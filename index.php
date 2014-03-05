@@ -23,7 +23,7 @@
 <script type="text/javascript" src="json/json.js"></script>
 <script type="text/javascript">
 	function frmCollectionSubmit()
-	{alert("test");
+	{alert("test111");
 		var formData = form2js('frmCollection', '.', true,
 				function(node)
 				{
