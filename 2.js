@@ -12,6 +12,7 @@
 	  'click button#pickup': 'pickupItem',
 	  'click input[id=collectionAddressModePostcode]':  'showList',
       'click input[id=collectionAddressModeLocalisation]': 'showAddress'
+	  //'click input[id=address-search]': 'showDetail'
     },
     initialize: function(){
       _.bindAll(this, 'render', 'addItem'); // every function that uses 'this' as the current object should be in here
@@ -47,12 +48,43 @@
 	showAddress: function(){
 	  $('div#postcode-container', this.el).hide();
 	  $('div#address-container', this.el).show();
+    },
+	
+	showDetail: function(){
+	 /* $('div#postcode-container', this.el).hide();
+	  $('div#address-container', this.el).show();*/
+	  
+	  var formData = form2js('frmCollection', '.', true,
+				function(node)
+				{
+					if (node.id && node.id.match(/callbackTest/))
+					{
+						//return { name: node.id, value: node.innerHTML };
+					}
+				});
+//alert(JSON.stringify(formData, null, '\t'));
+$('div#mainFirstDiv', this.el).hide();
+	 $('div#location_detail', this.el).show();
+		// $('div#location_detail', this.el).append("test");
+
+	//	document.getElementById('testArea').innerHTML = JSON.stringify(formData, null, '\t');
+		//$('div#mainFirstDiv', this.el).hide();
+	 // $('div#location_detail', this.el).show();
+		// $('div#location_detail', this.el).append(JSON.stringify(formData, null, '\t'));
+		//$(this.el).append("<ol></ol>");
+     // $('ol', this.el).append("<li>hello world</li>");
     }
+	
+	
+	
 
 	
   });
 
   var listView = new ListView();
+  
+
+  
 })(jQuery);
 
 
