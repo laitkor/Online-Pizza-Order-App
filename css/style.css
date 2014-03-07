@@ -8,10 +8,11 @@ background-color: #CCFFCC;
 .grad1
 {
 border-radius:10px;
-background: -webkit-linear-gradient(#C40404,#4285F4); /* For Safari 5.1 to 6.0 */
-background: -o-linear-gradient(#C40404,#4285F4); /* For Opera 11.1 to 12.0 */
-background: -moz-linear-gradient(#C40404,#4285F4); /* For Firefox 3.6 to 15 */
-background: linear-gradient(#C40404,#4285F4); /* Standard syntax (must be last) */
+background-color:#FFC140;
+/*background: -webkit-linear-gradient(#DEF2FD,#FEEDFF); /* For Safari 5.1 to 6.0 */
+/*background: -o-linear-gradient(#DEF2FD,#FEEDFF); /* For Opera 11.1 to 12.0 */
+/*background: -moz-linear-gradient(#DEF2FD,#FEEDFF); /* For Firefox 3.6 to 15 */
+/*background: linear-gradient(#DEF2FD,#FEEDFF); /* Standard syntax (must be last) */
 }
 
 .formDiv{
@@ -27,5 +28,71 @@ background: linear-gradient(#C40404,#4285F4); /* Standard syntax (must be last) 
 	margin: 0 0 30px 30px;
     padding: 22px 0 22px 22px;
 }
+.listingMainDiv{
+	border-radius:10px;
+	background-color:#FFC140;
+	float:left;
+	padding: 30px 0 30px 0;
+	border:1px solid #FFC140;
+	width:100%;
+}
+.margin-left0{
+	margin: 0 ; 
+}
+.margin-left-top30{
+	margin: 30px 0 30px 30px; 
+}
+.width930{
+	width:930px;
+}
+.width247{
+	width:247px;
+}
+.account-detail{
+	border-radius:10px;
+	border:0px solid red;
+	background-color:#E6A213;
+	
+}
+.account-head{
+	border-radius:10px 10px 0 0;
+	background-color:#39B54A;
+	color:#FFE09D;
+	padding:5px;
+
+}
+.account-detail-main{
+	padding:5px;
+	border-radius:10px;
+}
+.account-slid{
+	padding:5px 0 5px 0;
+	background-color:#FFE09D;
+	color:#D31A03;
+	border-radius:10px;
+}
+.margin-bottom20{
+margin-bottom:20px;
+}
+.productDetailDiv{
+	width: 90%;
+	padding:20px;
+	margin:10px;
+	background-color:#fff;
+	border-radius:10px;
+	text-align:left;
+}
+.choose-basics{
+	background-color:#FFE09D;
+	border-radius:10px;
+	padding:10px;
+	margin:10px 0;
+}
+.error{
+	color:red;
+	font-size:11px;
+}
+
+
 
 
