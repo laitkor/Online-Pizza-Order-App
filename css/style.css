@@ -70,6 +70,7 @@ background-color:#FFC140;
 	background-color:#FFE09D;
 	color:#D31A03;
 	border-radius:10px;
+	cursor:pointer;
 }
 .margin-bottom20{
 margin-bottom:20px;
@@ -92,6 +93,47 @@ margin-bottom:20px;
 	color:red;
 	font-size:11px;
 }
+.choose-toppings{
+	float: left;
+    width: 95%;
+}
+.default-recipe-toppings{
+	border-radius:10px;
+	float:left;
+    width: 30%;
+	background-color:#FEE998;
+	margin:0 120px 0 0;
+	
+}
+.toppings-pic{
+	float:left;
+    width: 40%;
+}
+.topping-main{
+	
+	width:100%;
+}
+.toppingsheading1{
+	border-radius:10px 10px 0 0;
+	background-color:#FFBB00;
+	color:#48AD50;
+	padding:6px;
+	font-size: 15px;
+    font-weight: bold;
+}
+.toppinggroup{
+	padding:5px;
+}
+
+.toppingsheading{
+	border-radius:10px 10px 0 0;
+	background-color:#FFBB00;
+	color:#48AD50;
+	padding:6px;
+	font-size: 15px;
+    font-weight: bold;
+}
+
 
 
 

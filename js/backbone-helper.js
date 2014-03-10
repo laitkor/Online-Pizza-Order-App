@@ -1,7 +1,7 @@
 
 (function($){
   Backbone.sync = function(method, model, success, error){
-    success();
+   // success();
   }
 		  
   var ListView = Backbone.View.extend({
@@ -51,28 +51,7 @@
     },
 	
 	showDetail: function(){
-	 /* $('div#postcode-container', this.el).hide();
-	  $('div#address-container', this.el).show();*/
-	  
-	  var formData = form2js('frmCollection', '.', true,
-				function(node)
-				{
-					if (node.id && node.id.match(/callbackTest/))
-					{
-						//return { name: node.id, value: node.innerHTML };
-					}
-				});
-//alert(JSON.stringify(formData, null, '\t'));
-$('div#mainFirstDiv', this.el).hide();
-	 $('div#location_detail', this.el).show();
-		// $('div#location_detail', this.el).append("test");
-
-	//	document.getElementById('testArea').innerHTML = JSON.stringify(formData, null, '\t');
-		//$('div#mainFirstDiv', this.el).hide();
-	 // $('div#location_detail', this.el).show();
-		// $('div#location_detail', this.el).append(JSON.stringify(formData, null, '\t'));
-		//$(this.el).append("<ol></ol>");
-     // $('ol', this.el).append("<li>hello world</li>");
+	
     }
 	
 	

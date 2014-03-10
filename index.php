@@ -18,13 +18,10 @@
 <script src="backbone/underscore.js"></script>
 <script src="backbone/backbone-min.js"></script>
 
-
-
 <!--for json array-->
 <script type="text/javascript" src="json/formjs.js"></script>
 <script type="text/javascript" src="json/js2form.js"></script>
 <script type="text/javascript" src="json/json.js"></script>
-
 
 
 <script type="text/javascript">
@@ -35,7 +32,7 @@
 		// validate form from Backbone JS
 		if($("input:radio[id='collectionAddressModeLocalisation']").is(":checked")) {
 		
-			var Chapter = Backbone.Model.extend({ 
+			var Order = Backbone.Model.extend({ 
 			  validate: function(attrs, options) {
 				if (attrs.TownCity == '') {
 				  return "TownCity";
@@ -48,8 +45,8 @@
 			  }
 			});
 			
-			var one = new Chapter({
-			  title : "Chapter One: The Beginning"
+			var one = new Order({
+			  title : "Success"
 			});
 			
 			one.on("invalid", function(model, error) {
@@ -70,22 +67,72 @@
 		}
 		
 		if(flg == 1){
-		// convert to json
-		var formData = form2js('frmCollection', '.', true,
-				function(node)
+			// convert to json
+			var formData = form2js('frmCollection', '.', true,
+			function(node)
+			{
+				if (node.id && node.id.match(/callbackTest/))
 				{
-					if (node.id && node.id.match(/callbackTest/))
-					{
-						return { name: node.id, value: node.innerHTML };
-					}
-				});
-
-		document.getElementById('testArea').innerHTML = JSON.stringify(formData, null, '\t');
-		document.getElementById('location-val').value = JSON.stringify(formData, null, '\t');
+					return { name: node.id, value: node.innerHTML };
+				}
+			});
+	
+			document.getElementById('testArea').innerHTML = JSON.stringify(formData, null, '\t');
+			document.getElementById('location-val').value = JSON.stringify(formData, null, '\t');
+			
+			$('div#mainFirstDiv', this.el).hide();
+			$('div#location_detail', this.el).show();	
+			
+			// get json elements into form elements
+			populateForm();
 		
-		$('div#mainFirstDiv', this.el).hide();
-		$('div#location_detail', this.el).show();	
-		populateForm();
+			Address = Backbone.Model.extend({});
+		
+			AddressCollection = Backbone.Collection.extend({
+				model: Address
+			});
+			
+			var jsonString = $("#location-val" ).val();
+
+			var addressArray = JSON.parse(jsonString);
+			var addressCollection = new AddressCollection(addressArray);
+			addressCollection.fetch();
+			//alert(JSON.stringify(addressCollection));
+			
+			 _.each(addressCollection.models, function (msg) {
+			 	if(msg.get("addressMode") == "option1"){
+					$( "#inputted-address" ).html( msg.get("locationSelected") + ", India");
+					$( "#inputted-address-hut" ).html( msg.get("locationSelected")+ "<br/> India" );
+					$( "#order-box-address" ).html( msg.get("locationSelected")+ "<br/> India" );
+				}else{
+					$( "#inputted-address" ).html( msg.get("District")+ ", " + msg.get("TownCity"));
+					$( "#inputted-address-hut" ).html( msg.get("District")+ "<br/> " + msg.get("TownCity") + "<br/> India" );
+					$( "#order-box-address" ).html( msg.get("District")+ "<br/> " + msg.get("TownCity") + "<br/> India" );
+
+				}
+			// alert("code => "+ msg.get("addressMode") +", message => "+ msg.get("locationSelected"));
+			 // console.log( "code => "+ msg.get("addressMode") +", message => "+ msg.get("addressMode"));
+			 });
+			 
+			  var ListAddress = Backbone.View.extend({
+			    el: $('div#featureSectiom'), // el attaches to existing element
+			  	events: {
+				  'click span#storedetail-change-link': 'showMain'
+				},
+				
+				 initialize: function(){
+				  //this.showMain();
+				},
+				
+				 showMain: function(){
+				  $('div#mainFirstDiv', this.el).show();
+				  $('div#location_detail', this.el).hide();
+				}
+							
+			  });
+			  
+			   var listAddress = new ListAddress();
+		
 		}
 	}
 	// convert json  to form value
@@ -102,6 +149,8 @@
 	{
 		$('div#mainLocationContainer', this.el).hide();
 		$('div#listingContainer', this.el).show();	
+		$('div#viewProductCollectionDiv', this.el).show();
+		$('div#viewProductDetailDiv', this.el).hide();	
 		
 		$('#start-over').click(function() {
 			$('div#listingContainer', this.el).hide();
@@ -110,6 +159,7 @@
 			$('div#mainLocationContainer', this.el).show();	
 			$('div#mainDivDelPickup', this.el).show();	
 		});
+				
 		
 		var formData = form2js('frmConfirmOrder', '.', true,
 				function(node)
@@ -121,10 +171,10 @@
 				});
 				
 		$( "#testArea" ).append( JSON.stringify(formData, null, '\t') );
-		$( "#location-val" ).append( JSON.stringify(formData, null, '\t') );
+		$( "#time-val" ).val( JSON.stringify(formData, null, '\t') );
 			
 
-		Person = Backbone.Model.extend({
+		/*Person = Backbone.Model.extend({
 	
 		});
 		
@@ -132,19 +182,25 @@
 			model: Person
 		});
 		
-		var jsonString = $("#testArea" ).html();
-		//var jsonString = $("#location-val" ).val();
+		//var jsonString = $("#testArea" ).html();
+		var jsonString = $("#location-val" ).val();
 		alert (jsonString);
 			
 		
 		var people = JSON.parse(jsonString);
-		var personCollection = new PersonCollection(people.location);
-		//alert(personCollection.addressMode);
-		//alert(console.log( personCollection.models ));
+		var personCollection = new PersonCollection(people);
+		personCollection.fetch();
+		alert(JSON.stringify(personCollection));
 		
-		window.alert( "Collection has: " + personCollection.length + " items");
+		 _.each(personCollection.models, function (msg) {
+		 alert("code => "+ msg.get("addressMode") +", message => "+ msg.get("locationSelected"));
+		 
+		 
+      	 // console.log( "code => "+ msg.get("addressMode") +", message => "+ msg.get("addressMode"));
+   		 });
 		
-		//console.log( myAlbum.models );
+		//window.alert( "Collection has: " + personCollection.length + " items");*/
+		
 	
 	}
 	
@@ -163,7 +219,27 @@
 				});
 				
 		$( "#testArea" ).append( JSON.stringify(formData, null, '\t') );
-		$( "#location-val" ).append( JSON.stringify(formData, null, '\t') );
+		$( "#selected-pizza-item" ).val( JSON.stringify(formData, null, '\t') );
+		
+			PizzaItem = Backbone.Model.extend({});
+		
+			PizzaItemCollection = Backbone.Collection.extend({
+				model: PizzaItem
+			});
+			
+			var jsonString = $("#selected-pizza-item" ).val();
+
+			var itemArray = JSON.parse(jsonString);
+			var pizzaItemCollection = new PizzaItemCollection(itemArray);
+			//addressCollection.fetch();
+			
+			 _.each(pizzaItemCollection.models, function (msg) {
+			 	$( "#item-name" ).html( msg.get("productName"+msg.get("productNumber")));
+			 
+			 	
+			// alert("code => "+ msg.get("addressMode") +", message => "+ msg.get("locationSelected"));
+			 // console.log( "code => "+ msg.get("addressMode") +", message => "+ msg.get("addressMode"));
+			 });
 	}
 	
 	
@@ -181,102 +257,42 @@
 			$('.toggle2').toggle();
 			return false;
 		});
-			
-	});
 		
+		
+		$('#IsCurrentOrderSelected').click(function(){
+			if($("#IsCurrentOrderSelected").is(':checked') == true){
+				$('input:checkbox[id=IsFutureOrderSelected]').attr('checked',false);
+			}
+		});
+		
+		$('#IsFutureOrderSelected').click(function(){
+			if($("#IsFutureOrderSelected").is(':checked') == true){
+				$('input:checkbox[id=IsCurrentOrderSelected]').attr('checked',false);
+			}
+		});
+
+					
+	});
 	
-</script>
-  
+				
+</script> 
 </head>
 <body id="body">
-
- 
-<!--<script>
-    $(function() {
-      var NestedModel = Backbone.Model.extend({
-        schema: {
-          name: { validators: ['required']},
-          email: { validators: ['required', 'email'] }
-        }
-      });
-        
-      var schema = {
-        email:      { dataType: 'email', validators: ['required', 'email'] },
-        tel:        { type: 'Text', dataType: 'tel', validators: ['required'], help: 'Include area code' },
-        number:     { type: 'Number', validators: [/[0-9]+(?:\.[0-9]*)?/] },
-        hidden:     { type: 'Hidden' },
-        checkbox:   { type: 'Checkbox' },
-        radio:      { type: 'Radio', options: ['Opt 1', 'Opt 2'] },
-        select:     { type: 'Select', options: ['Opt 1', 'Opt 2'] },
-        groupSelect: { type: 'Select', options: [
-          {
-            group: 'North America', options: [
-              { val: 'ca', label: 'Canada' },
-              { val: 'us', label: 'United States' }
-            ],
-          },
-          {
-            group: 'Europe', options: [
-              { val: 'es', label: 'Spain' },
-              { val: 'fr', label: 'France' },
-              { val: 'uk', label: 'United Kingdom' }
-            ]
-          }
-        ] },
-        checkboxes: { type: 'Checkboxes', options: ['Sterling', 'Lana', 'Cyril', 'Cheryl', 'Pam'] },
-        object:     { type: 'Object', subSchema: {
-          name: {},
-          age:  { type: 'Number' }
-        }},
-        nestedModel: { type: 'NestedModel', model: NestedModel },
-        shorthand: 'Password',
-        date: { type: 'Date' },
-        dateTime: { type: 'DateTime', yearStart: 2000, yearEnd: 1980 },
-
-        //List
-        textList: { type: 'List', itemType: 'Text', validators: ['required', 'email'] },
-        objList: { type: 'List', itemType: 'Object', subSchema: {
-          name: { type: 'Text', validators: ['required'] },
-          age: 'Number'
-        } }
-      };
-      
-      var model = new Backbone.Model({
-        number: null,
-        hidden: 'secret!',
-        checkbox: true,
-        textList: ['item1', 'item2', 'item3']
-      });
-
-      var form = new Backbone.Form({
-        model: model,
-        schema: schema,
-        fieldsets: [
-          ['email', 'tel', 'number', 'hidden', 'checkbox', 'radio', 'select', 'groupSelect', 'checkboxes', 'customTemplate', 'shorthand', 'date', 'dateTime'],
-          { legend: 'Lists', fields: ['textList', 'objList'] },
-          { legend: 'Nested editors', fields: ['object', 'nestedModel'] }
-        ]
-      });
-      
-      window.form = form;
-
-      $('#uiTest #formContainer').html(form.render().el);
-
-      $('#uiTest label').click(function() {
-        var name = $(this).attr('for'),
-            $editor = $('#' + name),
-            key = $editor.attr('name');
-
-        console.log(form.getValue(key))
-      });
-      
-      $('#uiTest button.validate').click(function() { form.validate() });
-    });
-  </script>-->
-<pre><code id="testArea">
-</code>
-<input type="hidden" id="location-val" >
+<pre><code id="testArea"></code>
 </pre>
+<input type="hidden" id="location-val" >
+<input type="hidden" id="time-val" >
+<input type="hidden" id="selected-pizza-item" >
+
+
+	<form id="pickupAddress" style="display:none;" >
+		<input type="text" name="locationSelected" value="">
+		<input type="text" name="TownCity" value="">
+		<input type="text" name="District" value="">
+		<input type="text" name="addressMode" value="">
+		
+
+	</form>
 
 <section id="bodySection">
 	<div id="featureSectiom">
@@ -301,7 +317,7 @@
 <div>
 
 <label class="radio text-left">
-<input type="radio" name="location.addressMode" id="collectionAddressModePostcode" value="option1" checked>
+<input type="radio" name="addressMode" id="collectionAddressModePostcode" value="option1" checked>
 Store Search
 </label>
             <div id="postcode-container">
@@ -310,8 +326,8 @@ Store Search
                     <div>
                         <div class="editor-label"><label class="popup-heading-black" for="SelectedStore">Store</label></div>
                         <div class="editor-field">
-							<input type="hidden" id="location-selected-val"  name="location.locationSelected">
-							<select name="location.SelectedStoreId" id="SelectedStoreId" >
+							<input type="hidden" id="location-selected-val"  name="locationSelected">
+							<select name="SelectedStoreId" id="SelectedStoreId" >
 							<option value="219" selected="selected">Ahmedabad - Ashram Road</option>
 							<option value="200">Ahmedabad - Shapath</option>
 							<option value="214">Ahmedabad - Shivalik</option>
@@ -430,7 +446,7 @@ Store Search
             </div>
 			
 			<label class="radio text-left">
-			<input type="radio" name="location.addressMode" id="collectionAddressModeLocalisation" value="localisationSearch" >
+			<input type="radio" name="addressMode" id="collectionAddressModeLocalisation" value="localisationSearch" >
 			Address Search
 			</label>
 
@@ -444,7 +460,7 @@ Store Search
 	<div>
 	   
 		<div class="editor-field">
-			<input type="text"  placeholder="Type / Select City" class="class="focused"" title="City" name="location.TownCity" id="TownCity" data-val="true" data-val-required="City is required"> 
+			<input type="text"  placeholder="Type / Select City" class="class="focused"" title="City" name="TownCity" id="TownCity" data-val="true" data-val-required="City is required"> 
 			<br>
 			<span id="TownCityError" class="error"></span> 
 			
@@ -453,7 +469,7 @@ Store Search
 	<div>
 		
 		<div class="editor-field">
-			<input type="text"  placeholder="Type / Select Locality" class="focused" title="Locality" name="location.District" id="District"> 
+			<input type="text"  placeholder="Type / Select Locality" class="focused" title="Locality" name="District" id="District"> 
 			<br>
 			<span id="DistrictError" class="error"></span> 
  
@@ -591,14 +607,7 @@ Store Search
 				<!--2nd page : pickup detail for location-->
 				<div class="span8 text-center grad1" id="location_detail" style="display:none;" >
 					<div class="span7 text-center">
-					<form id="pickupAddress" >
-					<span></span>
-					<input type="text" name="location.locationSelected" value="">
-					<input type="text" name="location.TownCity" value="">
-					<input type="text" name="location.District" value="">
 					
-
-					</form>
 					<div class="text-left">
 						<h1>PICK UP</h1>
 							
@@ -606,28 +615,18 @@ Store Search
 <br>
 <div class="pop-box-container">
     <span class="pop-box-lefttext">I am located at</span>
-    <span class="btn btn-danger">Ashram Road</span>
-    <a id="storedetail-change-link" href="#" class="btn btn-link">Change</a>
+    <span class="btn btn-danger" id="inputted-address"></span>
+    <span id="storedetail-change-link"  class="btn btn-link">Change</span>
 </div>
 <br>
 <div class="ordertime-address-container">
     
     <div class="ordertime-address-storeraddress">
         <div class="ordertime-address-heading">
-            <span class="popup-heading-black">
-               <b> Your Neighboring Hut</b>
-            </span>
-           
+                <h4> Your Neighboring Hut</h4>
+           		<div class="streetname" id="inputted-address-hut">  </div>
         </div>
-           
-                <div class="streetname"> Ground Floor, </div>
-                <div class="district">City Gold Multiplex, </div>
-                <div class="postcodeorzip">Ashram Road, Ahmedabad, India, </div>
-            <div class="postcodeorzip">Ashram Road</div>
-
-
-        <br>
-           
+         <br>
     <div class="telephone-label">Phone:</div>
     <div class="telephone">
         <div class="storedetail-storelist-tel-left">
@@ -650,673 +649,29 @@ Store Search
 							<div id="future-order-container">
   
 							<form id="frmConfirmOrder" action="javascript:frmConfirmOrderSubmit()" >
-								<input type="checkbox" value="true" name="time.IsCurrentOrderSelected" id="IsCurrentOrderSelected" checked="checked">
+								<input type="checkbox" value="true" name="timeIsCurrentOrderSelected" id="IsCurrentOrderSelected" checked="checked">
 								<span>Now</span>
 								<br>
-								<input type="checkbox" value="true" updatable="True" name="time.IsFutureOrderSelected" id="IsFutureOrderSelected"><input type="hidden" value="false" > 
+								<input type="checkbox" value="true" updatable="True" name="timeIsFutureOrderSelected" id="IsFutureOrderSelected">
+								
 							   <span>Later</span>
 								<br>
-								<br>
-								<select name="time.SelectedOrderTime" id="SelectedOrderTime">
-								<option value="05/03/2014 12:02:00" selected="selected">12:02</option>
-								<option value="05/03/2014 12:03:00">12:03</option>
-								<option value="05/03/2014 12:04:00">12:04</option>
-								<option value="05/03/2014 12:05:00">12:05</option>
-								<option value="05/03/2014 12:06:00">12:06</option>
-								<option value="05/03/2014 12:07:00">12:07</option>
-								<option value="05/03/2014 12:08:00">12:08</option>
-								<option value="05/03/2014 12:09:00">12:09</option>
-								<option value="05/03/2014 12:10:00">12:10</option>
-								<option value="05/03/2014 12:11:00">12:11</option>
-								<option value="05/03/2014 12:12:00">12:12</option>
-								<option value="05/03/2014 12:13:00">12:13</option>
-								<option value="05/03/2014 12:14:00">12:14</option>
-								<option value="05/03/2014 12:15:00">12:15</option>
-								<option value="05/03/2014 12:16:00">12:16</option>
-								<option value="05/03/2014 12:17:00">12:17</option>
-								<option value="05/03/2014 12:18:00">12:18</option>
-								<option value="05/03/2014 12:19:00">12:19</option>
-								<option value="05/03/2014 12:20:00">12:20</option>
-								<option value="05/03/2014 12:21:00">12:21</option>
-								<option value="05/03/2014 12:22:00">12:22</option>
-								<option value="05/03/2014 12:23:00">12:23</option>
-								<option value="05/03/2014 12:24:00">12:24</option>
-								<option value="05/03/2014 12:25:00">12:25</option>
-								<option value="05/03/2014 12:26:00">12:26</option>
-								<option value="05/03/2014 12:27:00">12:27</option>
-								<option value="05/03/2014 12:28:00">12:28</option>
-								<option value="05/03/2014 12:29:00">12:29</option>
-								<option value="05/03/2014 12:30:00">12:30</option>
-								<option value="05/03/2014 12:31:00">12:31</option>
-								<option value="05/03/2014 12:32:00">12:32</option>
-								<option value="05/03/2014 12:33:00">12:33</option>
-								<option value="05/03/2014 12:34:00">12:34</option>
-								<option value="05/03/2014 12:35:00">12:35</option>
-								<option value="05/03/2014 12:36:00">12:36</option>
-								<option value="05/03/2014 12:37:00">12:37</option>
-								<option value="05/03/2014 12:38:00">12:38</option>
-								<option value="05/03/2014 12:39:00">12:39</option>
-								<option value="05/03/2014 12:40:00">12:40</option>
-								<option value="05/03/2014 12:41:00">12:41</option>
-								<option value="05/03/2014 12:42:00">12:42</option>
-								<option value="05/03/2014 12:43:00">12:43</option>
-								<option value="05/03/2014 12:44:00">12:44</option>
-								<option value="05/03/2014 12:45:00">12:45</option>
-								<option value="05/03/2014 12:46:00">12:46</option>
-								<option value="05/03/2014 12:47:00">12:47</option>
-								<option value="05/03/2014 12:48:00">12:48</option>
-								<option value="05/03/2014 12:49:00">12:49</option>
-								<option value="05/03/2014 12:50:00">12:50</option>
-								<option value="05/03/2014 12:51:00">12:51</option>
-								<option value="05/03/2014 12:52:00">12:52</option>
-								<option value="05/03/2014 12:53:00">12:53</option>
-								<option value="05/03/2014 12:54:00">12:54</option>
-								<option value="05/03/2014 12:55:00">12:55</option>
-								<option value="05/03/2014 12:56:00">12:56</option>
-								<option value="05/03/2014 12:57:00">12:57</option>
-								<option value="05/03/2014 12:58:00">12:58</option>
-								<option value="05/03/2014 12:59:00">12:59</option>
-								<option value="05/03/2014 13:00:00">13:00</option>
-								<option value="05/03/2014 13:01:00">13:01</option>
-								<option value="05/03/2014 13:02:00">13:02</option>
-								<option value="05/03/2014 13:03:00">13:03</option>
-								<option value="05/03/2014 13:04:00">13:04</option>
-								<option value="05/03/2014 13:05:00">13:05</option>
-								<option value="05/03/2014 13:06:00">13:06</option>
-								<option value="05/03/2014 13:07:00">13:07</option>
-								<option value="05/03/2014 13:08:00">13:08</option>
-								<option value="05/03/2014 13:09:00">13:09</option>
-								<option value="05/03/2014 13:10:00">13:10</option>
-								<option value="05/03/2014 13:11:00">13:11</option>
-								<option value="05/03/2014 13:12:00">13:12</option>
-								<option value="05/03/2014 13:13:00">13:13</option>
-								<option value="05/03/2014 13:14:00">13:14</option>
-								<option value="05/03/2014 13:15:00">13:15</option>
-								<option value="05/03/2014 13:16:00">13:16</option>
-								<option value="05/03/2014 13:17:00">13:17</option>
-								<option value="05/03/2014 13:18:00">13:18</option>
-								<option value="05/03/2014 13:19:00">13:19</option>
-								<option value="05/03/2014 13:20:00">13:20</option>
-								<option value="05/03/2014 13:21:00">13:21</option>
-								<option value="05/03/2014 13:22:00">13:22</option>
-								<option value="05/03/2014 13:23:00">13:23</option>
-								<option value="05/03/2014 13:24:00">13:24</option>
-								<option value="05/03/2014 13:25:00">13:25</option>
-								<option value="05/03/2014 13:26:00">13:26</option>
-								<option value="05/03/2014 13:27:00">13:27</option>
-								<option value="05/03/2014 13:28:00">13:28</option>
-								<option value="05/03/2014 13:29:00">13:29</option>
-								<option value="05/03/2014 13:30:00">13:30</option>
-								<option value="05/03/2014 13:31:00">13:31</option>
-								<option value="05/03/2014 13:32:00">13:32</option>
-								<option value="05/03/2014 13:33:00">13:33</option>
-								<option value="05/03/2014 13:34:00">13:34</option>
-								<option value="05/03/2014 13:35:00">13:35</option>
-								<option value="05/03/2014 13:36:00">13:36</option>
-								<option value="05/03/2014 13:37:00">13:37</option>
-								<option value="05/03/2014 13:38:00">13:38</option>
-								<option value="05/03/2014 13:39:00">13:39</option>
-								<option value="05/03/2014 13:40:00">13:40</option>
-								<option value="05/03/2014 13:41:00">13:41</option>
-								<option value="05/03/2014 13:42:00">13:42</option>
-								<option value="05/03/2014 13:43:00">13:43</option>
-								<option value="05/03/2014 13:44:00">13:44</option>
-								<option value="05/03/2014 13:45:00">13:45</option>
-								<option value="05/03/2014 13:46:00">13:46</option>
-								<option value="05/03/2014 13:47:00">13:47</option>
-								<option value="05/03/2014 13:48:00">13:48</option>
-								<option value="05/03/2014 13:49:00">13:49</option>
-								<option value="05/03/2014 13:50:00">13:50</option>
-								<option value="05/03/2014 13:51:00">13:51</option>
-								<option value="05/03/2014 13:52:00">13:52</option>
-								<option value="05/03/2014 13:53:00">13:53</option>
-								<option value="05/03/2014 13:54:00">13:54</option>
-								<option value="05/03/2014 13:55:00">13:55</option>
-								<option value="05/03/2014 13:56:00">13:56</option>
-								<option value="05/03/2014 13:57:00">13:57</option>
-								<option value="05/03/2014 13:58:00">13:58</option>
-								<option value="05/03/2014 13:59:00">13:59</option>
-								<option value="05/03/2014 14:00:00">14:00</option>
-								<option value="05/03/2014 14:01:00">14:01</option>
-								<option value="05/03/2014 14:02:00">14:02</option>
-								<option value="05/03/2014 14:03:00">14:03</option>
-								<option value="05/03/2014 14:04:00">14:04</option>
-								<option value="05/03/2014 14:05:00">14:05</option>
-								<option value="05/03/2014 14:06:00">14:06</option>
-								<option value="05/03/2014 14:07:00">14:07</option>
-								<option value="05/03/2014 14:08:00">14:08</option>
-								<option value="05/03/2014 14:09:00">14:09</option>
-								<option value="05/03/2014 14:10:00">14:10</option>
-								<option value="05/03/2014 14:11:00">14:11</option>
-								<option value="05/03/2014 14:12:00">14:12</option>
-								<option value="05/03/2014 14:13:00">14:13</option>
-								<option value="05/03/2014 14:14:00">14:14</option>
-								<option value="05/03/2014 14:15:00">14:15</option>
-								<option value="05/03/2014 14:16:00">14:16</option>
-								<option value="05/03/2014 14:17:00">14:17</option>
-								<option value="05/03/2014 14:18:00">14:18</option>
-								<option value="05/03/2014 14:19:00">14:19</option>
-								<option value="05/03/2014 14:20:00">14:20</option>
-								<option value="05/03/2014 14:21:00">14:21</option>
-								<option value="05/03/2014 14:22:00">14:22</option>
-								<option value="05/03/2014 14:23:00">14:23</option>
-								<option value="05/03/2014 14:24:00">14:24</option>
-								<option value="05/03/2014 14:25:00">14:25</option>
-								<option value="05/03/2014 14:26:00">14:26</option>
-								<option value="05/03/2014 14:27:00">14:27</option>
-								<option value="05/03/2014 14:28:00">14:28</option>
-								<option value="05/03/2014 14:29:00">14:29</option>
-								<option value="05/03/2014 14:30:00">14:30</option>
-								<option value="05/03/2014 14:31:00">14:31</option>
-								<option value="05/03/2014 14:32:00">14:32</option>
-								<option value="05/03/2014 14:33:00">14:33</option>
-								<option value="05/03/2014 14:34:00">14:34</option>
-								<option value="05/03/2014 14:35:00">14:35</option>
-								<option value="05/03/2014 14:36:00">14:36</option>
-								<option value="05/03/2014 14:37:00">14:37</option>
-								<option value="05/03/2014 14:38:00">14:38</option>
-								<option value="05/03/2014 14:39:00">14:39</option>
-								<option value="05/03/2014 14:40:00">14:40</option>
-								<option value="05/03/2014 14:41:00">14:41</option>
-								<option value="05/03/2014 14:42:00">14:42</option>
-								<option value="05/03/2014 14:43:00">14:43</option>
-								<option value="05/03/2014 14:44:00">14:44</option>
-								<option value="05/03/2014 14:45:00">14:45</option>
-								<option value="05/03/2014 14:46:00">14:46</option>
-								<option value="05/03/2014 14:47:00">14:47</option>
-								<option value="05/03/2014 14:48:00">14:48</option>
-								<option value="05/03/2014 14:49:00">14:49</option>
-								<option value="05/03/2014 14:50:00">14:50</option>
-								<option value="05/03/2014 14:51:00">14:51</option>
-								<option value="05/03/2014 14:52:00">14:52</option>
-								<option value="05/03/2014 14:53:00">14:53</option>
-								<option value="05/03/2014 14:54:00">14:54</option>
-								<option value="05/03/2014 14:55:00">14:55</option>
-								<option value="05/03/2014 14:56:00">14:56</option>
-								<option value="05/03/2014 14:57:00">14:57</option>
-								<option value="05/03/2014 14:58:00">14:58</option>
-								<option value="05/03/2014 14:59:00">14:59</option>
-								<option value="05/03/2014 15:00:00">15:00</option>
-								<option value="05/03/2014 15:01:00">15:01</option>
-								<option value="05/03/2014 15:02:00">15:02</option>
-								<option value="05/03/2014 15:03:00">15:03</option>
-								<option value="05/03/2014 15:04:00">15:04</option>
-								<option value="05/03/2014 15:05:00">15:05</option>
-								<option value="05/03/2014 15:06:00">15:06</option>
-								<option value="05/03/2014 15:07:00">15:07</option>
-								<option value="05/03/2014 15:08:00">15:08</option>
-								<option value="05/03/2014 15:09:00">15:09</option>
-								<option value="05/03/2014 15:10:00">15:10</option>
-								<option value="05/03/2014 15:11:00">15:11</option>
-								<option value="05/03/2014 15:12:00">15:12</option>
-								<option value="05/03/2014 15:13:00">15:13</option>
-								<option value="05/03/2014 15:14:00">15:14</option>
-								<option value="05/03/2014 15:15:00">15:15</option>
-								<option value="05/03/2014 15:16:00">15:16</option>
-								<option value="05/03/2014 15:17:00">15:17</option>
-								<option value="05/03/2014 15:18:00">15:18</option>
-								<option value="05/03/2014 15:19:00">15:19</option>
-								<option value="05/03/2014 15:20:00">15:20</option>
-								<option value="05/03/2014 15:21:00">15:21</option>
-								<option value="05/03/2014 15:22:00">15:22</option>
-								<option value="05/03/2014 15:23:00">15:23</option>
-								<option value="05/03/2014 15:24:00">15:24</option>
-								<option value="05/03/2014 15:25:00">15:25</option>
-								<option value="05/03/2014 15:26:00">15:26</option>
-								<option value="05/03/2014 15:27:00">15:27</option>
-								<option value="05/03/2014 15:28:00">15:28</option>
-								<option value="05/03/2014 15:29:00">15:29</option>
-								<option value="05/03/2014 15:30:00">15:30</option>
-								<option value="05/03/2014 15:31:00">15:31</option>
-								<option value="05/03/2014 15:32:00">15:32</option>
-								<option value="05/03/2014 15:33:00">15:33</option>
-								<option value="05/03/2014 15:34:00">15:34</option>
-								<option value="05/03/2014 15:35:00">15:35</option>
-								<option value="05/03/2014 15:36:00">15:36</option>
-								<option value="05/03/2014 15:37:00">15:37</option>
-								<option value="05/03/2014 15:38:00">15:38</option>
-								<option value="05/03/2014 15:39:00">15:39</option>
-								<option value="05/03/2014 15:40:00">15:40</option>
-								<option value="05/03/2014 15:41:00">15:41</option>
-								<option value="05/03/2014 15:42:00">15:42</option>
-								<option value="05/03/2014 15:43:00">15:43</option>
-								<option value="05/03/2014 15:44:00">15:44</option>
-								<option value="05/03/2014 15:45:00">15:45</option>
-								<option value="05/03/2014 15:46:00">15:46</option>
-								<option value="05/03/2014 15:47:00">15:47</option>
-								<option value="05/03/2014 15:48:00">15:48</option>
-								<option value="05/03/2014 15:49:00">15:49</option>
-								<option value="05/03/2014 15:50:00">15:50</option>
-								<option value="05/03/2014 15:51:00">15:51</option>
-								<option value="05/03/2014 15:52:00">15:52</option>
-								<option value="05/03/2014 15:53:00">15:53</option>
-								<option value="05/03/2014 15:54:00">15:54</option>
-								<option value="05/03/2014 15:55:00">15:55</option>
-								<option value="05/03/2014 15:56:00">15:56</option>
-								<option value="05/03/2014 15:57:00">15:57</option>
-								<option value="05/03/2014 15:58:00">15:58</option>
-								<option value="05/03/2014 15:59:00">15:59</option>
-								<option value="05/03/2014 16:00:00">16:00</option>
-								<option value="05/03/2014 16:01:00">16:01</option>
-								<option value="05/03/2014 16:02:00">16:02</option>
-								<option value="05/03/2014 16:03:00">16:03</option>
-								<option value="05/03/2014 16:04:00">16:04</option>
-								<option value="05/03/2014 16:05:00">16:05</option>
-								<option value="05/03/2014 16:06:00">16:06</option>
-								<option value="05/03/2014 16:07:00">16:07</option>
-								<option value="05/03/2014 16:08:00">16:08</option>
-								<option value="05/03/2014 16:09:00">16:09</option>
-								<option value="05/03/2014 16:10:00">16:10</option>
-								<option value="05/03/2014 16:11:00">16:11</option>
-								<option value="05/03/2014 16:12:00">16:12</option>
-								<option value="05/03/2014 16:13:00">16:13</option>
-								<option value="05/03/2014 16:14:00">16:14</option>
-								<option value="05/03/2014 16:15:00">16:15</option>
-								<option value="05/03/2014 16:16:00">16:16</option>
-								<option value="05/03/2014 16:17:00">16:17</option>
-								<option value="05/03/2014 16:18:00">16:18</option>
-								<option value="05/03/2014 16:19:00">16:19</option>
-								<option value="05/03/2014 16:20:00">16:20</option>
-								<option value="05/03/2014 16:21:00">16:21</option>
-								<option value="05/03/2014 16:22:00">16:22</option>
-								<option value="05/03/2014 16:23:00">16:23</option>
-								<option value="05/03/2014 16:24:00">16:24</option>
-								<option value="05/03/2014 16:25:00">16:25</option>
-								<option value="05/03/2014 16:26:00">16:26</option>
-								<option value="05/03/2014 16:27:00">16:27</option>
-								<option value="05/03/2014 16:28:00">16:28</option>
-								<option value="05/03/2014 16:29:00">16:29</option>
-								<option value="05/03/2014 16:30:00">16:30</option>
-								<option value="05/03/2014 16:31:00">16:31</option>
-								<option value="05/03/2014 16:32:00">16:32</option>
-								<option value="05/03/2014 16:33:00">16:33</option>
-								<option value="05/03/2014 16:34:00">16:34</option>
-								<option value="05/03/2014 16:35:00">16:35</option>
-								<option value="05/03/2014 16:36:00">16:36</option>
-								<option value="05/03/2014 16:37:00">16:37</option>
-								<option value="05/03/2014 16:38:00">16:38</option>
-								<option value="05/03/2014 16:39:00">16:39</option>
-								<option value="05/03/2014 16:40:00">16:40</option>
-								<option value="05/03/2014 16:41:00">16:41</option>
-								<option value="05/03/2014 16:42:00">16:42</option>
-								<option value="05/03/2014 16:43:00">16:43</option>
-								<option value="05/03/2014 16:44:00">16:44</option>
-								<option value="05/03/2014 16:45:00">16:45</option>
-								<option value="05/03/2014 16:46:00">16:46</option>
-								<option value="05/03/2014 16:47:00">16:47</option>
-								<option value="05/03/2014 16:48:00">16:48</option>
-								<option value="05/03/2014 16:49:00">16:49</option>
-								<option value="05/03/2014 16:50:00">16:50</option>
-								<option value="05/03/2014 16:51:00">16:51</option>
-								<option value="05/03/2014 16:52:00">16:52</option>
-								<option value="05/03/2014 16:53:00">16:53</option>
-								<option value="05/03/2014 16:54:00">16:54</option>
-								<option value="05/03/2014 16:55:00">16:55</option>
-								<option value="05/03/2014 16:56:00">16:56</option>
-								<option value="05/03/2014 16:57:00">16:57</option>
-								<option value="05/03/2014 16:58:00">16:58</option>
-								<option value="05/03/2014 16:59:00">16:59</option>
-								<option value="05/03/2014 17:00:00">17:00</option>
-								<option value="05/03/2014 17:01:00">17:01</option>
-								<option value="05/03/2014 17:02:00">17:02</option>
-								<option value="05/03/2014 17:03:00">17:03</option>
-								<option value="05/03/2014 17:04:00">17:04</option>
-								<option value="05/03/2014 17:05:00">17:05</option>
-								<option value="05/03/2014 17:06:00">17:06</option>
-								<option value="05/03/2014 17:07:00">17:07</option>
-								<option value="05/03/2014 17:08:00">17:08</option>
-								<option value="05/03/2014 17:09:00">17:09</option>
-								<option value="05/03/2014 17:10:00">17:10</option>
-								<option value="05/03/2014 17:11:00">17:11</option>
-								<option value="05/03/2014 17:12:00">17:12</option>
-								<option value="05/03/2014 17:13:00">17:13</option>
-								<option value="05/03/2014 17:14:00">17:14</option>
-								<option value="05/03/2014 17:15:00">17:15</option>
-								<option value="05/03/2014 17:16:00">17:16</option>
-								<option value="05/03/2014 17:17:00">17:17</option>
-								<option value="05/03/2014 17:18:00">17:18</option>
-								<option value="05/03/2014 17:19:00">17:19</option>
-								<option value="05/03/2014 17:20:00">17:20</option>
-								<option value="05/03/2014 17:21:00">17:21</option>
-								<option value="05/03/2014 17:22:00">17:22</option>
-								<option value="05/03/2014 17:23:00">17:23</option>
-								<option value="05/03/2014 17:24:00">17:24</option>
-								<option value="05/03/2014 17:25:00">17:25</option>
-								<option value="05/03/2014 17:26:00">17:26</option>
-								<option value="05/03/2014 17:27:00">17:27</option>
-								<option value="05/03/2014 17:28:00">17:28</option>
-								<option value="05/03/2014 17:29:00">17:29</option>
-								<option value="05/03/2014 17:30:00">17:30</option>
-								<option value="05/03/2014 17:31:00">17:31</option>
-								<option value="05/03/2014 17:32:00">17:32</option>
-								<option value="05/03/2014 17:33:00">17:33</option>
-								<option value="05/03/2014 17:34:00">17:34</option>
-								<option value="05/03/2014 17:35:00">17:35</option>
-								<option value="05/03/2014 17:36:00">17:36</option>
-								<option value="05/03/2014 17:37:00">17:37</option>
-								<option value="05/03/2014 17:38:00">17:38</option>
-								<option value="05/03/2014 17:39:00">17:39</option>
-								<option value="05/03/2014 17:40:00">17:40</option>
-								<option value="05/03/2014 17:41:00">17:41</option>
-								<option value="05/03/2014 17:42:00">17:42</option>
-								<option value="05/03/2014 17:43:00">17:43</option>
-								<option value="05/03/2014 17:44:00">17:44</option>
-								<option value="05/03/2014 17:45:00">17:45</option>
-								<option value="05/03/2014 17:46:00">17:46</option>
-								<option value="05/03/2014 17:47:00">17:47</option>
-								<option value="05/03/2014 17:48:00">17:48</option>
-								<option value="05/03/2014 17:49:00">17:49</option>
-								<option value="05/03/2014 17:50:00">17:50</option>
-								<option value="05/03/2014 17:51:00">17:51</option>
-								<option value="05/03/2014 17:52:00">17:52</option>
-								<option value="05/03/2014 17:53:00">17:53</option>
-								<option value="05/03/2014 17:54:00">17:54</option>
-								<option value="05/03/2014 17:55:00">17:55</option>
-								<option value="05/03/2014 17:56:00">17:56</option>
-								<option value="05/03/2014 17:57:00">17:57</option>
-								<option value="05/03/2014 17:58:00">17:58</option>
-								<option value="05/03/2014 17:59:00">17:59</option>
-								<option value="05/03/2014 18:00:00">18:00</option>
-								<option value="05/03/2014 18:01:00">18:01</option>
-								<option value="05/03/2014 18:02:00">18:02</option>
-								<option value="05/03/2014 18:03:00">18:03</option>
-								<option value="05/03/2014 18:04:00">18:04</option>
-								<option value="05/03/2014 18:05:00">18:05</option>
-								<option value="05/03/2014 18:06:00">18:06</option>
-								<option value="05/03/2014 18:07:00">18:07</option>
-								<option value="05/03/2014 18:08:00">18:08</option>
-								<option value="05/03/2014 18:09:00">18:09</option>
-								<option value="05/03/2014 18:10:00">18:10</option>
-								<option value="05/03/2014 18:11:00">18:11</option>
-								<option value="05/03/2014 18:12:00">18:12</option>
-								<option value="05/03/2014 18:13:00">18:13</option>
-								<option value="05/03/2014 18:14:00">18:14</option>
-								<option value="05/03/2014 18:15:00">18:15</option>
-								<option value="05/03/2014 18:16:00">18:16</option>
-								<option value="05/03/2014 18:17:00">18:17</option>
-								<option value="05/03/2014 18:18:00">18:18</option>
-								<option value="05/03/2014 18:19:00">18:19</option>
-								<option value="05/03/2014 18:20:00">18:20</option>
-								<option value="05/03/2014 18:21:00">18:21</option>
-								<option value="05/03/2014 18:22:00">18:22</option>
-								<option value="05/03/2014 18:23:00">18:23</option>
-								<option value="05/03/2014 18:24:00">18:24</option>
-								<option value="05/03/2014 18:25:00">18:25</option>
-								<option value="05/03/2014 18:26:00">18:26</option>
-								<option value="05/03/2014 18:27:00">18:27</option>
-								<option value="05/03/2014 18:28:00">18:28</option>
-								<option value="05/03/2014 18:29:00">18:29</option>
-								<option value="05/03/2014 18:30:00">18:30</option>
-								<option value="05/03/2014 18:31:00">18:31</option>
-								<option value="05/03/2014 18:32:00">18:32</option>
-								<option value="05/03/2014 18:33:00">18:33</option>
-								<option value="05/03/2014 18:34:00">18:34</option>
-								<option value="05/03/2014 18:35:00">18:35</option>
-								<option value="05/03/2014 18:36:00">18:36</option>
-								<option value="05/03/2014 18:37:00">18:37</option>
-								<option value="05/03/2014 18:38:00">18:38</option>
-								<option value="05/03/2014 18:39:00">18:39</option>
-								<option value="05/03/2014 18:40:00">18:40</option>
-								<option value="05/03/2014 18:41:00">18:41</option>
-								<option value="05/03/2014 18:42:00">18:42</option>
-								<option value="05/03/2014 18:43:00">18:43</option>
-								<option value="05/03/2014 18:44:00">18:44</option>
-								<option value="05/03/2014 18:45:00">18:45</option>
-								<option value="05/03/2014 18:46:00">18:46</option>
-								<option value="05/03/2014 18:47:00">18:47</option>
-								<option value="05/03/2014 18:48:00">18:48</option>
-								<option value="05/03/2014 18:49:00">18:49</option>
-								<option value="05/03/2014 18:50:00">18:50</option>
-								<option value="05/03/2014 18:51:00">18:51</option>
-								<option value="05/03/2014 18:52:00">18:52</option>
-								<option value="05/03/2014 18:53:00">18:53</option>
-								<option value="05/03/2014 18:54:00">18:54</option>
-								<option value="05/03/2014 18:55:00">18:55</option>
-								<option value="05/03/2014 18:56:00">18:56</option>
-								<option value="05/03/2014 18:57:00">18:57</option>
-								<option value="05/03/2014 18:58:00">18:58</option>
-								<option value="05/03/2014 18:59:00">18:59</option>
-								<option value="05/03/2014 19:00:00">19:00</option>
-								<option value="05/03/2014 19:01:00">19:01</option>
-								<option value="05/03/2014 19:02:00">19:02</option>
-								<option value="05/03/2014 19:03:00">19:03</option>
-								<option value="05/03/2014 19:04:00">19:04</option>
-								<option value="05/03/2014 19:05:00">19:05</option>
-								<option value="05/03/2014 19:06:00">19:06</option>
-								<option value="05/03/2014 19:07:00">19:07</option>
-								<option value="05/03/2014 19:08:00">19:08</option>
-								<option value="05/03/2014 19:09:00">19:09</option>
-								<option value="05/03/2014 19:10:00">19:10</option>
-								<option value="05/03/2014 19:11:00">19:11</option>
-								<option value="05/03/2014 19:12:00">19:12</option>
-								<option value="05/03/2014 19:13:00">19:13</option>
-								<option value="05/03/2014 19:14:00">19:14</option>
-								<option value="05/03/2014 19:15:00">19:15</option>
-								<option value="05/03/2014 19:16:00">19:16</option>
-								<option value="05/03/2014 19:17:00">19:17</option>
-								<option value="05/03/2014 19:18:00">19:18</option>
-								<option value="05/03/2014 19:19:00">19:19</option>
-								<option value="05/03/2014 19:20:00">19:20</option>
-								<option value="05/03/2014 19:21:00">19:21</option>
-								<option value="05/03/2014 19:22:00">19:22</option>
-								<option value="05/03/2014 19:23:00">19:23</option>
-								<option value="05/03/2014 19:24:00">19:24</option>
-								<option value="05/03/2014 19:25:00">19:25</option>
-								<option value="05/03/2014 19:26:00">19:26</option>
-								<option value="05/03/2014 19:27:00">19:27</option>
-								<option value="05/03/2014 19:28:00">19:28</option>
-								<option value="05/03/2014 19:29:00">19:29</option>
-								<option value="05/03/2014 19:30:00">19:30</option>
-								<option value="05/03/2014 19:31:00">19:31</option>
-								<option value="05/03/2014 19:32:00">19:32</option>
-								<option value="05/03/2014 19:33:00">19:33</option>
-								<option value="05/03/2014 19:34:00">19:34</option>
-								<option value="05/03/2014 19:35:00">19:35</option>
-								<option value="05/03/2014 19:36:00">19:36</option>
-								<option value="05/03/2014 19:37:00">19:37</option>
-								<option value="05/03/2014 19:38:00">19:38</option>
-								<option value="05/03/2014 19:39:00">19:39</option>
-								<option value="05/03/2014 19:40:00">19:40</option>
-								<option value="05/03/2014 19:41:00">19:41</option>
-								<option value="05/03/2014 19:42:00">19:42</option>
-								<option value="05/03/2014 19:43:00">19:43</option>
-								<option value="05/03/2014 19:44:00">19:44</option>
-								<option value="05/03/2014 19:45:00">19:45</option>
-								<option value="05/03/2014 19:46:00">19:46</option>
-								<option value="05/03/2014 19:47:00">19:47</option>
-								<option value="05/03/2014 19:48:00">19:48</option>
-								<option value="05/03/2014 19:49:00">19:49</option>
-								<option value="05/03/2014 19:50:00">19:50</option>
-								<option value="05/03/2014 19:51:00">19:51</option>
-								<option value="05/03/2014 19:52:00">19:52</option>
-								<option value="05/03/2014 19:53:00">19:53</option>
-								<option value="05/03/2014 19:54:00">19:54</option>
-								<option value="05/03/2014 19:55:00">19:55</option>
-								<option value="05/03/2014 19:56:00">19:56</option>
-								<option value="05/03/2014 19:57:00">19:57</option>
-								<option value="05/03/2014 19:58:00">19:58</option>
-								<option value="05/03/2014 19:59:00">19:59</option>
-								<option value="05/03/2014 20:00:00">20:00</option>
-								<option value="05/03/2014 20:01:00">20:01</option>
-								<option value="05/03/2014 20:02:00">20:02</option>
-								<option value="05/03/2014 20:03:00">20:03</option>
-								<option value="05/03/2014 20:04:00">20:04</option>
-								<option value="05/03/2014 20:05:00">20:05</option>
-								<option value="05/03/2014 20:06:00">20:06</option>
-								<option value="05/03/2014 20:07:00">20:07</option>
-								<option value="05/03/2014 20:08:00">20:08</option>
-								<option value="05/03/2014 20:09:00">20:09</option>
-								<option value="05/03/2014 20:10:00">20:10</option>
-								<option value="05/03/2014 20:11:00">20:11</option>
-								<option value="05/03/2014 20:12:00">20:12</option>
-								<option value="05/03/2014 20:13:00">20:13</option>
-								<option value="05/03/2014 20:14:00">20:14</option>
-								<option value="05/03/2014 20:15:00">20:15</option>
-								<option value="05/03/2014 20:16:00">20:16</option>
-								<option value="05/03/2014 20:17:00">20:17</option>
-								<option value="05/03/2014 20:18:00">20:18</option>
-								<option value="05/03/2014 20:19:00">20:19</option>
-								<option value="05/03/2014 20:20:00">20:20</option>
-								<option value="05/03/2014 20:21:00">20:21</option>
-								<option value="05/03/2014 20:22:00">20:22</option>
-								<option value="05/03/2014 20:23:00">20:23</option>
-								<option value="05/03/2014 20:24:00">20:24</option>
-								<option value="05/03/2014 20:25:00">20:25</option>
-								<option value="05/03/2014 20:26:00">20:26</option>
-								<option value="05/03/2014 20:27:00">20:27</option>
-								<option value="05/03/2014 20:28:00">20:28</option>
-								<option value="05/03/2014 20:29:00">20:29</option>
-								<option value="05/03/2014 20:30:00">20:30</option>
-								<option value="05/03/2014 20:31:00">20:31</option>
-								<option value="05/03/2014 20:32:00">20:32</option>
-								<option value="05/03/2014 20:33:00">20:33</option>
-								<option value="05/03/2014 20:34:00">20:34</option>
-								<option value="05/03/2014 20:35:00">20:35</option>
-								<option value="05/03/2014 20:36:00">20:36</option>
-								<option value="05/03/2014 20:37:00">20:37</option>
-								<option value="05/03/2014 20:38:00">20:38</option>
-								<option value="05/03/2014 20:39:00">20:39</option>
-								<option value="05/03/2014 20:40:00">20:40</option>
-								<option value="05/03/2014 20:41:00">20:41</option>
-								<option value="05/03/2014 20:42:00">20:42</option>
-								<option value="05/03/2014 20:43:00">20:43</option>
-								<option value="05/03/2014 20:44:00">20:44</option>
-								<option value="05/03/2014 20:45:00">20:45</option>
-								<option value="05/03/2014 20:46:00">20:46</option>
-								<option value="05/03/2014 20:47:00">20:47</option>
-								<option value="05/03/2014 20:48:00">20:48</option>
-								<option value="05/03/2014 20:49:00">20:49</option>
-								<option value="05/03/2014 20:50:00">20:50</option>
-								<option value="05/03/2014 20:51:00">20:51</option>
-								<option value="05/03/2014 20:52:00">20:52</option>
-								<option value="05/03/2014 20:53:00">20:53</option>
-								<option value="05/03/2014 20:54:00">20:54</option>
-								<option value="05/03/2014 20:55:00">20:55</option>
-								<option value="05/03/2014 20:56:00">20:56</option>
-								<option value="05/03/2014 20:57:00">20:57</option>
-								<option value="05/03/2014 20:58:00">20:58</option>
-								<option value="05/03/2014 20:59:00">20:59</option>
-								<option value="05/03/2014 21:00:00">21:00</option>
-								<option value="05/03/2014 21:01:00">21:01</option>
-								<option value="05/03/2014 21:02:00">21:02</option>
-								<option value="05/03/2014 21:03:00">21:03</option>
-								<option value="05/03/2014 21:04:00">21:04</option>
-								<option value="05/03/2014 21:05:00">21:05</option>
-								<option value="05/03/2014 21:06:00">21:06</option>
-								<option value="05/03/2014 21:07:00">21:07</option>
-								<option value="05/03/2014 21:08:00">21:08</option>
-								<option value="05/03/2014 21:09:00">21:09</option>
-								<option value="05/03/2014 21:10:00">21:10</option>
-								<option value="05/03/2014 21:11:00">21:11</option>
-								<option value="05/03/2014 21:12:00">21:12</option>
-								<option value="05/03/2014 21:13:00">21:13</option>
-								<option value="05/03/2014 21:14:00">21:14</option>
-								<option value="05/03/2014 21:15:00">21:15</option>
-								<option value="05/03/2014 21:16:00">21:16</option>
-								<option value="05/03/2014 21:17:00">21:17</option>
-								<option value="05/03/2014 21:18:00">21:18</option>
-								<option value="05/03/2014 21:19:00">21:19</option>
-								<option value="05/03/2014 21:20:00">21:20</option>
-								<option value="05/03/2014 21:21:00">21:21</option>
-								<option value="05/03/2014 21:22:00">21:22</option>
-								<option value="05/03/2014 21:23:00">21:23</option>
-								<option value="05/03/2014 21:24:00">21:24</option>
-								<option value="05/03/2014 21:25:00">21:25</option>
-								<option value="05/03/2014 21:26:00">21:26</option>
-								<option value="05/03/2014 21:27:00">21:27</option>
-								<option value="05/03/2014 21:28:00">21:28</option>
-								<option value="05/03/2014 21:29:00">21:29</option>
-								<option value="05/03/2014 21:30:00">21:30</option>
-								<option value="05/03/2014 21:31:00">21:31</option>
-								<option value="05/03/2014 21:32:00">21:32</option>
-								<option value="05/03/2014 21:33:00">21:33</option>
-								<option value="05/03/2014 21:34:00">21:34</option>
-								<option value="05/03/2014 21:35:00">21:35</option>
-								<option value="05/03/2014 21:36:00">21:36</option>
-								<option value="05/03/2014 21:37:00">21:37</option>
-								<option value="05/03/2014 21:38:00">21:38</option>
-								<option value="05/03/2014 21:39:00">21:39</option>
-								<option value="05/03/2014 21:40:00">21:40</option>
-								<option value="05/03/2014 21:41:00">21:41</option>
-								<option value="05/03/2014 21:42:00">21:42</option>
-								<option value="05/03/2014 21:43:00">21:43</option>
-								<option value="05/03/2014 21:44:00">21:44</option>
-								<option value="05/03/2014 21:45:00">21:45</option>
-								<option value="05/03/2014 21:46:00">21:46</option>
-								<option value="05/03/2014 21:47:00">21:47</option>
-								<option value="05/03/2014 21:48:00">21:48</option>
-								<option value="05/03/2014 21:49:00">21:49</option>
-								<option value="05/03/2014 21:50:00">21:50</option>
-								<option value="05/03/2014 21:51:00">21:51</option>
-								<option value="05/03/2014 21:52:00">21:52</option>
-								<option value="05/03/2014 21:53:00">21:53</option>
-								<option value="05/03/2014 21:54:00">21:54</option>
-								<option value="05/03/2014 21:55:00">21:55</option>
-								<option value="05/03/2014 21:56:00">21:56</option>
-								<option value="05/03/2014 21:57:00">21:57</option>
-								<option value="05/03/2014 21:58:00">21:58</option>
-								<option value="05/03/2014 21:59:00">21:59</option>
-								<option value="05/03/2014 22:00:00">22:00</option>
-								<option value="05/03/2014 22:01:00">22:01</option>
-								<option value="05/03/2014 22:02:00">22:02</option>
-								<option value="05/03/2014 22:03:00">22:03</option>
-								<option value="05/03/2014 22:04:00">22:04</option>
-								<option value="05/03/2014 22:05:00">22:05</option>
-								<option value="05/03/2014 22:06:00">22:06</option>
-								<option value="05/03/2014 22:07:00">22:07</option>
-								<option value="05/03/2014 22:08:00">22:08</option>
-								<option value="05/03/2014 22:09:00">22:09</option>
-								<option value="05/03/2014 22:10:00">22:10</option>
-								<option value="05/03/2014 22:11:00">22:11</option>
-								<option value="05/03/2014 22:12:00">22:12</option>
-								<option value="05/03/2014 22:13:00">22:13</option>
-								<option value="05/03/2014 22:14:00">22:14</option>
-								<option value="05/03/2014 22:15:00">22:15</option>
-								<option value="05/03/2014 22:16:00">22:16</option>
-								<option value="05/03/2014 22:17:00">22:17</option>
-								<option value="05/03/2014 22:18:00">22:18</option>
-								<option value="05/03/2014 22:19:00">22:19</option>
-								<option value="05/03/2014 22:20:00">22:20</option>
-								<option value="05/03/2014 22:21:00">22:21</option>
-								<option value="05/03/2014 22:22:00">22:22</option>
-								<option value="05/03/2014 22:23:00">22:23</option>
-								<option value="05/03/2014 22:24:00">22:24</option>
-								<option value="05/03/2014 22:25:00">22:25</option>
-								<option value="05/03/2014 22:26:00">22:26</option>
-								<option value="05/03/2014 22:27:00">22:27</option>
-								<option value="05/03/2014 22:28:00">22:28</option>
-								<option value="05/03/2014 22:29:00">22:29</option>
-								<option value="05/03/2014 22:30:00">22:30</option>
-								<option value="05/03/2014 22:31:00">22:31</option>
-								<option value="05/03/2014 22:32:00">22:32</option>
-								<option value="05/03/2014 22:33:00">22:33</option>
-								<option value="05/03/2014 22:34:00">22:34</option>
-								<option value="05/03/2014 22:35:00">22:35</option>
-								<option value="05/03/2014 22:36:00">22:36</option>
-								<option value="05/03/2014 22:37:00">22:37</option>
-								<option value="05/03/2014 22:38:00">22:38</option>
-								<option value="05/03/2014 22:39:00">22:39</option>
-								<option value="05/03/2014 22:40:00">22:40</option>
-								<option value="05/03/2014 22:41:00">22:41</option>
-								<option value="05/03/2014 22:42:00">22:42</option>
-								<option value="05/03/2014 22:43:00">22:43</option>
-								<option value="05/03/2014 22:44:00">22:44</option>
-								<option value="05/03/2014 22:45:00">22:45</option>
-								<option value="05/03/2014 22:46:00">22:46</option>
-								<option value="05/03/2014 22:47:00">22:47</option>
-								<option value="05/03/2014 22:48:00">22:48</option>
-								<option value="05/03/2014 22:49:00">22:49</option>
-								<option value="05/03/2014 22:50:00">22:50</option>
-								<option value="05/03/2014 22:51:00">22:51</option>
-								<option value="05/03/2014 22:52:00">22:52</option>
-								<option value="05/03/2014 22:53:00">22:53</option>
-								<option value="05/03/2014 22:54:00">22:54</option>
-								<option value="05/03/2014 22:55:00">22:55</option>
-								<option value="05/03/2014 22:56:00">22:56</option>
-								<option value="05/03/2014 22:57:00">22:57</option>
-								<option value="05/03/2014 22:58:00">22:58</option>
-								<option value="05/03/2014 22:59:00">22:59</option>
-								<option value="05/03/2014 23:00:00">23:00</option>
+								<br> 
+								<?php  $curr_hr = date('H'); $curr_mins = date('i'); ?>
+								<select name="timeSelectedOrderTime" id="SelectedOrderTime" style="width:100px;">
+								<?php 
+									for ($h=$curr_hr;$h<=23;$h++){
+										for ($m=0;$m<60;$m++){
+										if($h<=9 ) {$h="0".$h;}
+										if($m<=9 ) {$m="0".$m;}
+										
+									?>
+										<option value="<?php echo date("d/m/Y $h:$m:00");?>"><?php echo date("$h:$m");?></option>
+									
+									<?php
+										}
+									}
+								?>
 								</select>
 
 							</div>
@@ -1351,8 +706,9 @@ Store Search
 	   	
 		   <div class="span3 margin-left-top30 " >
 		   <form id="frmListingCollection<?php echo $i;?>" action="javascript:frmViewProductSubmit(<?php echo $i;?>)" >
-			<input type="hidden" name="selectedItem.productName<?php echo $i;?>" value="Italian Treat test <?php echo $i;?>" >
-				<div onClick="javascript:GetProduct(1371286);" class="Famous-box-img">
+			<input type="hidden" name="productName<?php echo $i;?>" value="Italian Treat test <?php echo $i;?>" >
+			<input type="hidden" name="productNumber" value="<?php echo $i;?>" >
+				<div class="Famous-box-img">
 					<img alt="Italian Treat BP" src="images/pizza_1.jpg">
 				</div>
 				<div class="Famous-box-titles">Italian Treat test <?php echo $i;?>  </div>
@@ -1376,41 +732,37 @@ Store Search
 
     <div class="basics">
         <div class="choose-recipie">
-           <h3> Italian Treat BP</h3>
+           <h3 id="item-name"> </h3>
         </div>
             
         <div class="toppings-background">    
             <div class="choose-basics">
                 Choose your crust &amp; size  </div>
         </div>
-        <div class="cpbuilder-divider-line"></div>
+		
         <div class="basics-options">
-            <div class="styled-select">
-                <select onchange="" name="ddlBaseSelected" id="ddlBaseSelected"><option value="6" selected="selected">Big Pizza</option>
-</select>                
-            </div>
+                <select onChange="" name="ddlBaseSelected" id="ddlBaseSelected"><option value="6" selected="selected">Big Pizza</option>
+</select>       
+				 <select name="ddlSizeSelected" id="ddlSizeSelected"><option value="4" selected="selected">Medium(Serves 2)</option>
+</select>         
         </div>        
-        <div class="basics-options">
-            <div class="styled-select">            
-                <select onchange="javascript:SelectOption(this, '/PHIndia/Web/NewComplexProduct/ChangeSize?selectedSizeId=SelectedId&amp;parentContainerId=complex-product-configurator-place-holder');" name="ddlSizeSelected" id="ddlSizeSelected"><option value="4" selected="selected">Medium(Serves 2)</option>
-</select>
-            </div>
-        </div>
         
     </div>
     <div class="clear"></div>
     <div class="toppings-heading">
         <div class="toppings-background choose-basics">
-            <div class="choose-toppings ">
+            <span class="choose-toppings ">
                 Add / Remove Toppings
-            </div>
+            </span>
+			 <span class="toppings-reset">
+				<a class="reset" href="#">Reset</a>
+			</span>
         </div>
-        <div class="toppings-reset">
-            <a class="reset" href="javascript:RemoveTopping('/PHIndia/Web/en-GB/PHIN/PHIN/Ahmedabad%20-%20Ashram%20Road/ComplexProduct/ResetProductConfigurationJson/1371286?parentContainerId=complex-product-configurator-place-holder');">Reset</a>
-        </div>
+       
         <div class="cpbuilder-divider-line"></div>
         <div class="clear"></div>
     </div>
+	<div class="topping-main">
     <div class="default-recipe-toppings">
         <div class="alltoppings">
 			<div id="veg-topping">
@@ -1421,668 +773,322 @@ Store Search
                 </div>
             </div>
                 <div id="divToppingGroupId_462" class="toppinggroup">
-                    <div onclick="javascript:void(0);" class="toppinggroup-name">
+                    <div onClick="javascript:void(0);" class="toppinggroup-name">
                         <div class="toppinggroup-name-title">
                             <div class="radio">
                                 <span>
-                                    <input type="radio" onclick="javascript:SelectTopping(this, '/PHIndia/Web/NewComplexProduct/AddTopping?productToppingId=70&amp;parentProductToppingGroupId=462&amp;currentProductToppingId=70&amp;currentSectionId=1&amp;currentDisplayOrder=1&amp;sectionId=1&amp;parentContainerId=complex-product-configurator-place-holder&amp;productToppingClass=Topping&amp;displayOrder=1&amp;isCombinedLeftRight=False&amp;isDouble=False&amp;isNewSelection=true&amp;groupToppingSectioName=Cheese', '/PHIndia/Web/Cache/397_Product_Small_Image_en-GB.bmp','divToppingGroupId_462','divToppingPictureContainedId');" value="All">                                    
+									<label class="radio text-left">
+									<input type="radio"  value="All" >
+									Cheese Rs 65.00 
+									</label>
+                                          
                                 </span>
                             </div>
-                            Cheese
-Rs 65.00                        </div>
+                            
+                       </div>
                     </div>                    
-                        
-                    <div style="display: none;" class="toppinggroup-options" id="divToppingGroupOptionsId_462">
-                    
-                        <div class="toppinggroup-option all">
-                            <div class="radio">
-                                    <span class="checked">
-                                        <input type="radio" checked="checked" value="All" name="Mozerella">
-                                    </span>
-                            </div>             
-                            <label for="Mozerella_All">
-                                All</label>
-                        </div>
-                        <div class="toppinggroup-option">                                
-                                <input type="checkbox" onchange="javascript:SwapTopping(this, '/PHIndia/Web/NewComplexProduct/SwapTopping?productToppingClass=Topping&amp;productToppingId=70&amp;parentProductToppingGroupId=462&amp;displayOrder=1&amp;sectionId=1&amp;isCombinedLeftRight=False&amp;parentContainerId=complex-product-configurator-place-holder&amp;groupToppingSectioName=Cheese','divToppingGroupId_462','divToppingPictureContainedId');" value="Doubled" id="Mozerella_Doubled" name="Mozerella_Doubled">
-                                
-                            <label for="Mozerella_Doubled">
-                                x2</label>
-                        </div>
-                        <div style="" class="toppinggroup-name-remove">
-                            <a href="javascript:RemoveTopping('/PHIndia/Web/NewComplexProduct/RemoveTopping?productToppingClass=Topping&amp;productToppingId=70&amp;parentProductToppingGroupId=462&amp;displayOrder=1&amp;sectionId=1&amp;parentContainerId=complex-product-configurator-place-holder&amp;isCombinedLeftRight=False&amp;groupToppingSectioName=Cheese','divToppingGroupId_462','divToppingPictureContainedId');">remove</a>
-                        </div>                    
-                    </div>                
                 </div>
-</div>
+			</div>
+			
 			<div id="nveg-topping">
             <div class="toppingsheading">
                 Non Veg Toppings
-                <div class="toppingspicture">
-                    <img align="top" src="/PHIndia/Web/Assets/PHIN/Images/topping-meat.png" alt="">
-                </div>
             </div>
 
                 <div id="divToppingGroupId_398" class="toppinggroup">
-                    <div onclick="javascript:void(0);" class="toppinggroup-name">
+                    <div onClick="javascript:void(0);" class="toppinggroup-name">
                         <div class="toppinggroup-name-title">
                             <div class="radio">
                                 <span>
-                                    <input type="radio" onclick="javascript:SelectTopping(this, '/PHIndia/Web/NewComplexProduct/AddTopping?productToppingId=62&amp;parentProductToppingGroupId=398&amp;currentProductToppingId=62&amp;currentSectionId=1&amp;currentDisplayOrder=1&amp;sectionId=1&amp;parentContainerId=complex-product-configurator-place-holder&amp;productToppingClass=Topping&amp;displayOrder=1&amp;isCombinedLeftRight=False&amp;isDouble=False&amp;isNewSelection=true&amp;groupToppingSectioName=Meat', '/PHIndia/Web/Cache/','divToppingGroupId_398','divToppingPictureContainedId');" value="All">                                    
+									<label class="radio text-left">
+									<input type="radio"  value="All" >
+									 Chunky Chicken Rs 65.00 
+									</label>
+                                   
                                 </span>
                             </div>
-                            Chunky Chicken
-Rs 65.00                        </div>
+                       </div>
                     </div>                    
                         
-                    <div style="display: none;" class="toppinggroup-options" id="divToppingGroupOptionsId_398">
-                    
-                        <div class="toppinggroup-option all">
-                            <div class="radio">
-                                    <span class="checked">
-                                        <input type="radio" checked="checked" value="All" name="Mozerella">
-                                    </span>
-                            </div>             
-                            <label for="Mozerella_All">
-                                All</label>
-                        </div>
-                        <div class="toppinggroup-option">                                
-                                <input type="checkbox" onclick="javascript:SwapTopping(this, '/PHIndia/Web/NewComplexProduct/SwapTopping?productToppingClass=Topping&amp;productToppingId=62&amp;parentProductToppingGroupId=398&amp;displayOrder=1&amp;sectionId=1&amp;isCombinedLeftRight=False&amp;parentContainerId=complex-product-configurator-place-holder&amp;groupToppingSectioName=Meat','divToppingGroupId_398','divToppingPictureContainedId');" value="Doubled" id="Mozerella_Doubled" name="Mozerella_Doubled">
-                                
-                            <label for="Mozerella_Doubled">
-                                x2</label>
-                        </div>
-                        <div style="" class="toppinggroup-name-remove">
-                            <a href="javascript:RemoveTopping('/PHIndia/Web/NewComplexProduct/RemoveTopping?productToppingClass=Topping&amp;productToppingId=62&amp;parentProductToppingGroupId=398&amp;displayOrder=1&amp;sectionId=1&amp;parentContainerId=complex-product-configurator-place-holder&amp;isCombinedLeftRight=False&amp;groupToppingSectioName=Meat','divToppingGroupId_398','divToppingPictureContainedId');">remove</a>
-                        </div>                    
-                    </div>                
+                                    
                 </div>
                 <div id="divToppingGroupId_399" class="toppinggroup">
-                    <div onclick="javascript:void(0);" class="toppinggroup-name">
+                    <div onClick="javascript:void(0);" class="toppinggroup-name">
                         <div class="toppinggroup-name-title">
                             <div class="radio">
                                 <span>
-                                    <input type="radio" onclick="javascript:SelectTopping(this, '/PHIndia/Web/NewComplexProduct/AddTopping?productToppingId=63&amp;parentProductToppingGroupId=399&amp;currentProductToppingId=63&amp;currentSectionId=1&amp;currentDisplayOrder=1&amp;sectionId=1&amp;parentContainerId=complex-product-configurator-place-holder&amp;productToppingClass=Topping&amp;displayOrder=1&amp;isCombinedLeftRight=False&amp;isDouble=False&amp;isNewSelection=true&amp;groupToppingSectioName=Meat', '/PHIndia/Web/Cache/','divToppingGroupId_399','divToppingPictureContainedId');" value="All">                                    
+									<label class="radio text-left">
+									<input type="radio"  value="All" >
+									 Chicken HotnSpicey Rs 65.00 
+									</label>
+                                    
                                 </span>
                             </div>
-                            Chicken HotnSpicey
-Rs 65.00                        </div>
+                         </div>
                     </div>                    
                         
-                    <div style="display: none;" class="toppinggroup-options" id="divToppingGroupOptionsId_399">
-                    
-                        <div class="toppinggroup-option all">
-                            <div class="radio">
-                                    <span class="checked">
-                                        <input type="radio" checked="checked" value="All" name="Mozerella">
-                                    </span>
-                            </div>             
-                            <label for="Mozerella_All">
-                                All</label>
-                        </div>
-                        <div class="toppinggroup-option">                                
-                                <input type="checkbox" onclick="javascript:SwapTopping(this, '/PHIndia/Web/NewComplexProduct/SwapTopping?productToppingClass=Topping&amp;productToppingId=63&amp;parentProductToppingGroupId=399&amp;displayOrder=1&amp;sectionId=1&amp;isCombinedLeftRight=False&amp;parentContainerId=complex-product-configurator-place-holder&amp;groupToppingSectioName=Meat','divToppingGroupId_399','divToppingPictureContainedId');" value="Doubled" id="Mozerella_Doubled" name="Mozerella_Doubled">
-                                
-                            <label for="Mozerella_Doubled">
-                                x2</label>
-                        </div>
-                        <div style="" class="toppinggroup-name-remove">
-                            <a href="javascript:RemoveTopping('/PHIndia/Web/NewComplexProduct/RemoveTopping?productToppingClass=Topping&amp;productToppingId=63&amp;parentProductToppingGroupId=399&amp;displayOrder=1&amp;sectionId=1&amp;parentContainerId=complex-product-configurator-place-holder&amp;isCombinedLeftRight=False&amp;groupToppingSectioName=Meat','divToppingGroupId_399','divToppingPictureContainedId');">remove</a>
-                        </div>                    
-                    </div>                
+                                    
                 </div>
                 <div id="divToppingGroupId_400" class="toppinggroup">
-                    <div onclick="javascript:void(0);" class="toppinggroup-name">
+                    <div onClick="javascript:void(0);" class="toppinggroup-name">
                         <div class="toppinggroup-name-title">
                             <div class="radio">
-                                <span>
-                                    <input type="radio" onclick="javascript:SelectTopping(this, '/PHIndia/Web/NewComplexProduct/AddTopping?productToppingId=64&amp;parentProductToppingGroupId=400&amp;currentProductToppingId=64&amp;currentSectionId=1&amp;currentDisplayOrder=1&amp;sectionId=1&amp;parentContainerId=complex-product-configurator-place-holder&amp;productToppingClass=Topping&amp;displayOrder=1&amp;isCombinedLeftRight=False&amp;isDouble=False&amp;isNewSelection=true&amp;groupToppingSectioName=Meat', '/PHIndia/Web/Cache/356_Product_Small_Image_en-GB.jpg','divToppingGroupId_400','divToppingPictureContainedId');" value="All">                                    
+                                 <span>
+									<label class="radio text-left">
+									<input type="radio"  value="All" >
+									 Chicken Tikka Rs 65.00 
+									</label>
+                                    
                                 </span>
                             </div>
-                            Chicken Tikka
-Rs 65.00                        </div>
+                  		 </div>
                     </div>                    
                         
-                    <div style="display: none;" class="toppinggroup-options" id="divToppingGroupOptionsId_400">
                     
-                        <div class="toppinggroup-option all">
-                            <div class="radio">
-                                    <span class="checked">
-                                        <input type="radio" checked="checked" value="All" name="Mozerella">
-                                    </span>
-                            </div>             
-                            <label for="Mozerella_All">
-                                All</label>
-                        </div>
-                        <div class="toppinggroup-option">                                
-                                <input type="checkbox" onclick="javascript:SwapTopping(this, '/PHIndia/Web/NewComplexProduct/SwapTopping?productToppingClass=Topping&amp;productToppingId=64&amp;parentProductToppingGroupId=400&amp;displayOrder=1&amp;sectionId=1&amp;isCombinedLeftRight=False&amp;parentContainerId=complex-product-configurator-place-holder&amp;groupToppingSectioName=Meat','divToppingGroupId_400','divToppingPictureContainedId');" value="Doubled" id="Mozerella_Doubled" name="Mozerella_Doubled">
-                                
-                            <label for="Mozerella_Doubled">
-                                x2</label>
-                        </div>
-                        <div style="" class="toppinggroup-name-remove">
-                            <a href="javascript:RemoveTopping('/PHIndia/Web/NewComplexProduct/RemoveTopping?productToppingClass=Topping&amp;productToppingId=64&amp;parentProductToppingGroupId=400&amp;displayOrder=1&amp;sectionId=1&amp;parentContainerId=complex-product-configurator-place-holder&amp;isCombinedLeftRight=False&amp;groupToppingSectioName=Meat','divToppingGroupId_400','divToppingPictureContainedId');">remove</a>
-                        </div>                    
-                    </div>                
+					                
                 </div>
                 <div id="divToppingGroupId_402" class="toppinggroup">
-                    <div onclick="javascript:void(0);" class="toppinggroup-name">
+                    <div onClick="javascript:void(0);" class="toppinggroup-name">
                         <div class="toppinggroup-name-title">
                             <div class="radio">
-                                <span>
-                                    <input type="radio" onclick="javascript:SelectTopping(this, '/PHIndia/Web/NewComplexProduct/AddTopping?productToppingId=14&amp;parentProductToppingGroupId=402&amp;currentProductToppingId=14&amp;currentSectionId=1&amp;currentDisplayOrder=1&amp;sectionId=1&amp;parentContainerId=complex-product-configurator-place-holder&amp;productToppingClass=Topping&amp;displayOrder=1&amp;isCombinedLeftRight=False&amp;isDouble=False&amp;isNewSelection=true&amp;groupToppingSectioName=Meat', '/PHIndia/Web/Cache/','divToppingGroupId_402','divToppingPictureContainedId');" value="All">                                    
+                                 <span>
+									<label class="radio text-left">
+									<input type="radio"  value="All" >
+									 CheesenOnion Rs 65.00 
+									</label>
                                 </span>
                             </div>
-                            CheesenOnion
-Rs 65.00                        </div>
+ 					   </div>
                     </div>                    
-                        
-                    <div style="display: none;" class="toppinggroup-options" id="divToppingGroupOptionsId_402">
-                    
-                        <div class="toppinggroup-option all">
-                            <div class="radio">
-                                    <span class="checked">
-                                        <input type="radio" checked="checked" value="All" name="Mozerella">
-                                    </span>
-                            </div>             
-                            <label for="Mozerella_All">
-                                All</label>
-                        </div>
-                        <div class="toppinggroup-option">                                
-                                <input type="checkbox" onclick="javascript:SwapTopping(this, '/PHIndia/Web/NewComplexProduct/SwapTopping?productToppingClass=Topping&amp;productToppingId=14&amp;parentProductToppingGroupId=402&amp;displayOrder=1&amp;sectionId=1&amp;isCombinedLeftRight=False&amp;parentContainerId=complex-product-configurator-place-holder&amp;groupToppingSectioName=Meat','divToppingGroupId_402','divToppingPictureContainedId');" value="Doubled" id="Mozerella_Doubled" name="Mozerella_Doubled">
-                                
-                            <label for="Mozerella_Doubled">
-                                x2</label>
-                        </div>
-                        <div style="" class="toppinggroup-name-remove">
-                            <a href="javascript:RemoveTopping('/PHIndia/Web/NewComplexProduct/RemoveTopping?productToppingClass=Topping&amp;productToppingId=14&amp;parentProductToppingGroupId=402&amp;displayOrder=1&amp;sectionId=1&amp;parentContainerId=complex-product-configurator-place-holder&amp;isCombinedLeftRight=False&amp;groupToppingSectioName=Meat','divToppingGroupId_402','divToppingPictureContainedId');">remove</a>
-                        </div>                    
-                    </div>                
+                                    
                 </div>
                 <div id="divToppingGroupId_404" class="toppinggroup">
-                    <div onclick="javascript:void(0);" class="toppinggroup-name">
+                    <div onClick="javascript:void(0);" class="toppinggroup-name">
                         <div class="toppinggroup-name-title">
                             <div class="radio">
-                                <span>
-                                    <input type="radio" onclick="javascript:SelectTopping(this, '/PHIndia/Web/NewComplexProduct/AddTopping?productToppingId=67&amp;parentProductToppingGroupId=404&amp;currentProductToppingId=67&amp;currentSectionId=1&amp;currentDisplayOrder=1&amp;sectionId=1&amp;parentContainerId=complex-product-configurator-place-holder&amp;productToppingClass=Topping&amp;displayOrder=1&amp;isCombinedLeftRight=False&amp;isDouble=False&amp;isNewSelection=true&amp;groupToppingSectioName=Meat', '/PHIndia/Web/Cache/359_Product_Small_Image_en-GB.jpg','divToppingGroupId_404','divToppingPictureContainedId');" value="All">                                    
+                               <span>
+									<label class="radio text-left">
+									<input type="radio"  value="All" >
+									 Kadai Chicken Rs 65.00 
+									</label>
                                 </span>
                             </div>
-                            Kadai Chicken
-Rs 65.00                        </div>
+                          </div>
                     </div>                    
                         
-                    <div style="display: none;" class="toppinggroup-options" id="divToppingGroupOptionsId_404">
-                    
-                        <div class="toppinggroup-option all">
-                            <div class="radio">
-                                    <span class="checked">
-                                        <input type="radio" checked="checked" value="All" name="Mozerella">
-                                    </span>
-                            </div>             
-                            <label for="Mozerella_All">
-                                All</label>
-                        </div>
-                        <div class="toppinggroup-option">                                
-                                <input type="checkbox" onclick="javascript:SwapTopping(this, '/PHIndia/Web/NewComplexProduct/SwapTopping?productToppingClass=Topping&amp;productToppingId=67&amp;parentProductToppingGroupId=404&amp;displayOrder=1&amp;sectionId=1&amp;isCombinedLeftRight=False&amp;parentContainerId=complex-product-configurator-place-holder&amp;groupToppingSectioName=Meat','divToppingGroupId_404','divToppingPictureContainedId');" value="Doubled" id="Mozerella_Doubled" name="Mozerella_Doubled">
-                                
-                            <label for="Mozerella_Doubled">
-                                x2</label>
-                        </div>
-                        <div style="" class="toppinggroup-name-remove">
-                            <a href="javascript:RemoveTopping('/PHIndia/Web/NewComplexProduct/RemoveTopping?productToppingClass=Topping&amp;productToppingId=67&amp;parentProductToppingGroupId=404&amp;displayOrder=1&amp;sectionId=1&amp;parentContainerId=complex-product-configurator-place-holder&amp;isCombinedLeftRight=False&amp;groupToppingSectioName=Meat','divToppingGroupId_404','divToppingPictureContainedId');">remove</a>
-                        </div>                    
-                    </div>                
+                                    
                 </div>
                 <div id="divToppingGroupId_877" class="toppinggroup">
-                    <div onclick="javascript:void(0);" class="toppinggroup-name">
+                    <div onClick="javascript:void(0);" class="toppinggroup-name">
                         <div class="toppinggroup-name-title">
                             <div class="radio">
-                                <span>
-                                    <input type="radio" onclick="javascript:SelectTopping(this, '/PHIndia/Web/NewComplexProduct/AddTopping?productToppingId=65&amp;parentProductToppingGroupId=877&amp;currentProductToppingId=65&amp;currentSectionId=1&amp;currentDisplayOrder=1&amp;sectionId=1&amp;parentContainerId=complex-product-configurator-place-holder&amp;productToppingClass=Topping&amp;displayOrder=1&amp;isCombinedLeftRight=False&amp;isDouble=False&amp;isNewSelection=true&amp;groupToppingSectioName=Meat', '/PHIndia/Web/Cache/','divToppingGroupId_877','divToppingPictureContainedId');" value="All">                                    
+                                 <span>
+									<label class="radio text-left">
+									<input type="radio"  value="All" >
+									 Pepperoni Rs 65.00 
+									</label>
                                 </span>
                             </div>
-                            Pepperoni
-Rs 65.00                        </div>
+  			           </div>
                     </div>                    
                         
-                    <div style="display: none;" class="toppinggroup-options" id="divToppingGroupOptionsId_877">
-                    
-                        <div class="toppinggroup-option all">
-                            <div class="radio">
-                                    <span class="checked">
-                                        <input type="radio" checked="checked" value="All" name="Mozerella">
-                                    </span>
-                            </div>             
-                            <label for="Mozerella_All">
-                                All</label>
-                        </div>
-                        <div class="toppinggroup-option">                                
-                                <input type="checkbox" onclick="javascript:SwapTopping(this, '/PHIndia/Web/NewComplexProduct/SwapTopping?productToppingClass=Topping&amp;productToppingId=65&amp;parentProductToppingGroupId=877&amp;displayOrder=1&amp;sectionId=1&amp;isCombinedLeftRight=False&amp;parentContainerId=complex-product-configurator-place-holder&amp;groupToppingSectioName=Meat','divToppingGroupId_877','divToppingPictureContainedId');" value="Doubled" id="Mozerella_Doubled" name="Mozerella_Doubled">
-                                
-                            <label for="Mozerella_Doubled">
-                                x2</label>
-                        </div>
-                        <div style="" class="toppinggroup-name-remove">
-                            <a href="javascript:RemoveTopping('/PHIndia/Web/NewComplexProduct/RemoveTopping?productToppingClass=Topping&amp;productToppingId=65&amp;parentProductToppingGroupId=877&amp;displayOrder=1&amp;sectionId=1&amp;parentContainerId=complex-product-configurator-place-holder&amp;isCombinedLeftRight=False&amp;groupToppingSectioName=Meat','divToppingGroupId_877','divToppingPictureContainedId');">remove</a>
-                        </div>                    
-                    </div>                
+                                    
                 </div>
 			</div>
 			<div id="veg-topping">
             <div class="toppingsheading">
                 Veg Toppings
-                <div class="toppingspicture">
-                    <img align="top" src="/PHIndia/Web/Assets/PHIN/Images/topping-veg.png" alt="">
-                </div>
             </div>
 
                 <div id="divToppingGroupId_386" class="toppinggroup">
-                    <div onclick="javascript:void(0);" class="toppinggroup-name">
+                    <div onClick="javascript:void(0);" class="toppinggroup-name">
                         <div class="toppinggroup-name-title">
                             <div class="radio">
-                                <span>
-                                    <input type="radio" onclick="javascript:SelectTopping(this, '/PHIndia/Web/NewComplexProduct/AddTopping?productToppingId=20&amp;parentProductToppingGroupId=386&amp;currentProductToppingId=20&amp;currentSectionId=1&amp;currentDisplayOrder=1&amp;sectionId=1&amp;parentContainerId=complex-product-configurator-place-holder&amp;productToppingClass=Topping&amp;displayOrder=1&amp;isCombinedLeftRight=False&amp;isDouble=False&amp;isNewSelection=true&amp;groupToppingSectioName=Vegetarian', '/PHIndia/Web/Cache/','divToppingGroupId_386','divToppingPictureContainedId');" value="All">                                    
+                                 <span>
+									<label class="radio text-left">
+									<input type="radio"  value="All" >
+									 (v)Capsicum Rs 65.00 
+									</label>
                                 </span>
                             </div>
-                            (v)Capsicum
-Rs 45.00                        </div>
+                         </div>
                     </div>                    
                         
-                    <div style="display: none;" class="toppinggroup-options" id="divToppingGroupOptionsId_386">
-                    
-                        <div class="toppinggroup-option all">
-                            <div class="radio">
-                                    <span class="checked">
-                                        <input type="radio" checked="checked" value="All" name="Mozerella">
-                                    </span>
-                            </div>             
-                            <label for="Mozerella_All">
-                                All</label>
-                        </div>
-                        <div class="toppinggroup-option">                                
-                                <input type="checkbox" onchange="javascript:SwapTopping(this, '/PHIndia/Web/NewComplexProduct/SwapTopping?productToppingClass=Topping&amp;productToppingId=20&amp;parentProductToppingGroupId=386&amp;displayOrder=1&amp;sectionId=1&amp;isCombinedLeftRight=False&amp;parentContainerId=complex-product-configurator-place-holder&amp;groupToppingSectioName=Vegetarian','divToppingGroupId_386','divToppingPictureContainedId');" value="Doubled" id="Mozerella_Doubled" name="Mozerella_Doubled">
-                                
-                            <label for="Mozerella_Doubled">
-                                x2</label>
-                        </div>
-                        <div style="" class="toppinggroup-name-remove">
-                            <a href="javascript:RemoveTopping('/PHIndia/Web/NewComplexProduct/RemoveTopping?productToppingClass=Topping&amp;productToppingId=20&amp;parentProductToppingGroupId=386&amp;displayOrder=1&amp;sectionId=1&amp;parentContainerId=complex-product-configurator-place-holder&amp;isCombinedLeftRight=False&amp;groupToppingSectioName=Vegetarian','divToppingGroupId_386','divToppingPictureContainedId');">remove</a>
-                        </div>                    
-                    </div>                
+                                    
                 </div>
                 <div id="divToppingGroupId_387" class="toppinggroup">
-                    <div onclick="javascript:void(0);" class="toppinggroup-name">
+                    <div onClick="javascript:void(0);" class="toppinggroup-name">
                         <div class="toppinggroup-name-title">
                             <div class="radio">
                                 <span>
-                                    <input type="radio" onclick="javascript:SelectTopping(this, '/PHIndia/Web/NewComplexProduct/AddTopping?productToppingId=21&amp;parentProductToppingGroupId=387&amp;currentProductToppingId=21&amp;currentSectionId=1&amp;currentDisplayOrder=1&amp;sectionId=1&amp;parentContainerId=complex-product-configurator-place-holder&amp;productToppingClass=Topping&amp;displayOrder=1&amp;isCombinedLeftRight=False&amp;isDouble=False&amp;isNewSelection=true&amp;groupToppingSectioName=Vegetarian', '/PHIndia/Web/Cache/400_Product_Small_Image_en-GB.png','divToppingGroupId_387','divToppingPictureContainedId');" value="All">                                    
+									<label class="radio text-left">
+									<input type="radio"  value="All" >
+									 (v)Onion Rs 65.00 
+									</label>
                                 </span>
                             </div>
-                            (v)Onion
-Rs 45.00                        </div>
+                         </div>
                     </div>                    
                         
-                    <div style="display: none;" class="toppinggroup-options" id="divToppingGroupOptionsId_387">
-                    
-                        <div class="toppinggroup-option all">
-                            <div class="radio">
-                                    <span class="checked">
-                                        <input type="radio" checked="checked" value="All" name="Mozerella">
-                                    </span>
-                            </div>             
-                            <label for="Mozerella_All">
-                                All</label>
-                        </div>
-                        <div class="toppinggroup-option">                                
-                                <input type="checkbox" onchange="javascript:SwapTopping(this, '/PHIndia/Web/NewComplexProduct/SwapTopping?productToppingClass=Topping&amp;productToppingId=21&amp;parentProductToppingGroupId=387&amp;displayOrder=1&amp;sectionId=1&amp;isCombinedLeftRight=False&amp;parentContainerId=complex-product-configurator-place-holder&amp;groupToppingSectioName=Vegetarian','divToppingGroupId_387','divToppingPictureContainedId');" value="Doubled" id="Mozerella_Doubled" name="Mozerella_Doubled">
-                                
-                            <label for="Mozerella_Doubled">
-                                x2</label>
-                        </div>
-                        <div style="" class="toppinggroup-name-remove">
-                            <a href="javascript:RemoveTopping('/PHIndia/Web/NewComplexProduct/RemoveTopping?productToppingClass=Topping&amp;productToppingId=21&amp;parentProductToppingGroupId=387&amp;displayOrder=1&amp;sectionId=1&amp;parentContainerId=complex-product-configurator-place-holder&amp;isCombinedLeftRight=False&amp;groupToppingSectioName=Vegetarian','divToppingGroupId_387','divToppingPictureContainedId');">remove</a>
-                        </div>                    
-                    </div>                
+                                    
                 </div>
                 <div id="divToppingGroupId_388" class="toppinggroup">
-                    <div onclick="javascript:void(0);" class="toppinggroup-name">
+                    <div onClick="javascript:void(0);" class="toppinggroup-name">
                         <div class="toppinggroup-name-title">
                             <div class="radio">
-                                <span>
-                                    <input type="radio" onclick="javascript:SelectTopping(this, '/PHIndia/Web/NewComplexProduct/AddTopping?productToppingId=4&amp;parentProductToppingGroupId=388&amp;currentProductToppingId=4&amp;currentSectionId=1&amp;currentDisplayOrder=1&amp;sectionId=1&amp;parentContainerId=complex-product-configurator-place-holder&amp;productToppingClass=Topping&amp;displayOrder=1&amp;isCombinedLeftRight=False&amp;isDouble=False&amp;isNewSelection=true&amp;groupToppingSectioName=Vegetarian', '/PHIndia/Web/Cache/','divToppingGroupId_388','divToppingPictureContainedId');" value="All">                                    
+                               <span>
+									<label class="radio text-left">
+									<input type="radio"  value="All" >
+									 (v)Tomato Rs 65.00 
+									</label>
                                 </span>
                             </div>
-                            (v)Tomato
-Rs 45.00                        </div>
+                         </div>
                     </div>                    
                         
-                    <div style="display: none;" class="toppinggroup-options" id="divToppingGroupOptionsId_388">
-                    
-                        <div class="toppinggroup-option all">
-                            <div class="radio">
-                                    <span class="checked">
-                                        <input type="radio" checked="checked" value="All" name="Mozerella">
-                                    </span>
-                            </div>             
-                            <label for="Mozerella_All">
-                                All</label>
-                        </div>
-                        <div class="toppinggroup-option">                                
-                                <input type="checkbox" onchange="javascript:SwapTopping(this, '/PHIndia/Web/NewComplexProduct/SwapTopping?productToppingClass=Topping&amp;productToppingId=4&amp;parentProductToppingGroupId=388&amp;displayOrder=1&amp;sectionId=1&amp;isCombinedLeftRight=False&amp;parentContainerId=complex-product-configurator-place-holder&amp;groupToppingSectioName=Vegetarian','divToppingGroupId_388','divToppingPictureContainedId');" value="Doubled" id="Mozerella_Doubled" name="Mozerella_Doubled">
-                                
-                            <label for="Mozerella_Doubled">
-                                x2</label>
-                        </div>
-                        <div style="" class="toppinggroup-name-remove">
-                            <a href="javascript:RemoveTopping('/PHIndia/Web/NewComplexProduct/RemoveTopping?productToppingClass=Topping&amp;productToppingId=4&amp;parentProductToppingGroupId=388&amp;displayOrder=1&amp;sectionId=1&amp;parentContainerId=complex-product-configurator-place-holder&amp;isCombinedLeftRight=False&amp;groupToppingSectioName=Vegetarian','divToppingGroupId_388','divToppingPictureContainedId');">remove</a>
-                        </div>                    
-                    </div>                
+                                    
                 </div>
                 <div id="divToppingGroupId_389" class="toppinggroup">
-                    <div onclick="javascript:void(0);" class="toppinggroup-name">
+                    <div onClick="javascript:void(0);" class="toppinggroup-name">
                         <div class="toppinggroup-name-title">
                             <div class="radio">
                                 <span>
-                                    <input type="radio" onclick="javascript:SelectTopping(this, '/PHIndia/Web/NewComplexProduct/AddTopping?productToppingId=54&amp;parentProductToppingGroupId=389&amp;currentProductToppingId=54&amp;currentSectionId=1&amp;currentDisplayOrder=1&amp;sectionId=1&amp;parentContainerId=complex-product-configurator-place-holder&amp;productToppingClass=Topping&amp;displayOrder=1&amp;isCombinedLeftRight=False&amp;isDouble=False&amp;isNewSelection=true&amp;groupToppingSectioName=Vegetarian', '/PHIndia/Web/Cache/','divToppingGroupId_389','divToppingPictureContainedId');" value="All">                                    
+									<label class="radio text-left">
+									<input type="radio"  value="All" >
+									 (v)Green Chillies Rs 65.00 
+									</label>
                                 </span>
                             </div>
-                            (v)Green Chillies
-Rs 45.00                        </div>
+                          </div>
                     </div>                    
                         
-                    <div style="display: none;" class="toppinggroup-options" id="divToppingGroupOptionsId_389">
-                    
-                        <div class="toppinggroup-option all">
-                            <div class="radio">
-                                    <span class="checked">
-                                        <input type="radio" checked="checked" value="All" name="Mozerella">
-                                    </span>
-                            </div>             
-                            <label for="Mozerella_All">
-                                All</label>
-                        </div>
-                        <div class="toppinggroup-option">                                
-                                <input type="checkbox" onchange="javascript:SwapTopping(this, '/PHIndia/Web/NewComplexProduct/SwapTopping?productToppingClass=Topping&amp;productToppingId=54&amp;parentProductToppingGroupId=389&amp;displayOrder=1&amp;sectionId=1&amp;isCombinedLeftRight=False&amp;parentContainerId=complex-product-configurator-place-holder&amp;groupToppingSectioName=Vegetarian','divToppingGroupId_389','divToppingPictureContainedId');" value="Doubled" id="Mozerella_Doubled" name="Mozerella_Doubled">
-                                
-                            <label for="Mozerella_Doubled">
-                                x2</label>
-                        </div>
-                        <div style="" class="toppinggroup-name-remove">
-                            <a href="javascript:RemoveTopping('/PHIndia/Web/NewComplexProduct/RemoveTopping?productToppingClass=Topping&amp;productToppingId=54&amp;parentProductToppingGroupId=389&amp;displayOrder=1&amp;sectionId=1&amp;parentContainerId=complex-product-configurator-place-holder&amp;isCombinedLeftRight=False&amp;groupToppingSectioName=Vegetarian','divToppingGroupId_389','divToppingPictureContainedId');">remove</a>
-                        </div>                    
-                    </div>                
+                                    
                 </div>
                 <div id="divToppingGroupId_390" class="toppinggroup">
-                    <div onclick="javascript:void(0);" class="toppinggroup-name">
+                    <div onClick="javascript:void(0);" class="toppinggroup-name">
                         <div class="toppinggroup-name-title">
                             <div class="radio">
                                 <span>
-                                    <input type="radio" onclick="javascript:SelectTopping(this, '/PHIndia/Web/NewComplexProduct/AddTopping?productToppingId=13&amp;parentProductToppingGroupId=390&amp;currentProductToppingId=13&amp;currentSectionId=1&amp;currentDisplayOrder=1&amp;sectionId=1&amp;parentContainerId=complex-product-configurator-place-holder&amp;productToppingClass=Topping&amp;displayOrder=1&amp;isCombinedLeftRight=False&amp;isDouble=False&amp;isNewSelection=true&amp;groupToppingSectioName=Vegetarian', '/PHIndia/Web/Cache/','divToppingGroupId_390','divToppingPictureContainedId');" value="All">                                    
+									<label class="radio text-left">
+									<input type="radio"  value="All" >
+									 (v)Mushroom Rs 65.00 
+									</label>
                                 </span>
                             </div>
-                            (v)Mushroom
-Rs 45.00                        </div>
+                        </div>
                     </div>                    
                         
-                    <div style="display: none;" class="toppinggroup-options" id="divToppingGroupOptionsId_390">
-                    
-                        <div class="toppinggroup-option all">
-                            <div class="radio">
-                                    <span class="checked">
-                                        <input type="radio" checked="checked" value="All" name="Mozerella">
-                                    </span>
-                            </div>             
-                            <label for="Mozerella_All">
-                                All</label>
-                        </div>
-                        <div class="toppinggroup-option">                                
-                                <input type="checkbox" onchange="javascript:SwapTopping(this, '/PHIndia/Web/NewComplexProduct/SwapTopping?productToppingClass=Topping&amp;productToppingId=13&amp;parentProductToppingGroupId=390&amp;displayOrder=1&amp;sectionId=1&amp;isCombinedLeftRight=False&amp;parentContainerId=complex-product-configurator-place-holder&amp;groupToppingSectioName=Vegetarian','divToppingGroupId_390','divToppingPictureContainedId');" value="Doubled" id="Mozerella_Doubled" name="Mozerella_Doubled">
-                                
-                            <label for="Mozerella_Doubled">
-                                x2</label>
-                        </div>
-                        <div style="" class="toppinggroup-name-remove">
-                            <a href="javascript:RemoveTopping('/PHIndia/Web/NewComplexProduct/RemoveTopping?productToppingClass=Topping&amp;productToppingId=13&amp;parentProductToppingGroupId=390&amp;displayOrder=1&amp;sectionId=1&amp;parentContainerId=complex-product-configurator-place-holder&amp;isCombinedLeftRight=False&amp;groupToppingSectioName=Vegetarian','divToppingGroupId_390','divToppingPictureContainedId');">remove</a>
-                        </div>                    
-                    </div>                
+                                    
                 </div>
                 <div id="divToppingGroupId_391" class="toppinggroup">
-                    <div onclick="javascript:void(0);" class="toppinggroup-name">
+                    <div onClick="javascript:void(0);" class="toppinggroup-name">
                         <div class="toppinggroup-name-title">
                             <div class="radio">
-                                <span>
-                                    <input type="radio" onclick="javascript:SelectTopping(this, '/PHIndia/Web/NewComplexProduct/AddTopping?productToppingId=55&amp;parentProductToppingGroupId=391&amp;currentProductToppingId=55&amp;currentSectionId=1&amp;currentDisplayOrder=1&amp;sectionId=1&amp;parentContainerId=complex-product-configurator-place-holder&amp;productToppingClass=Topping&amp;displayOrder=1&amp;isCombinedLeftRight=False&amp;isDouble=False&amp;isNewSelection=true&amp;groupToppingSectioName=Vegetarian', '/PHIndia/Web/Cache/','divToppingGroupId_391','divToppingPictureContainedId');" value="All">                                    
+                                 <span>
+									<label class="radio text-left">
+									<input type="radio"  value="All" >
+									 (v)Red Capsicum Rs 65.00 
+									</label>
                                 </span>
                             </div>
-                            (v)Red Capsicum
-Rs 45.00                        </div>
+                         </div>
                     </div>                    
                         
-                    <div style="display: none;" class="toppinggroup-options" id="divToppingGroupOptionsId_391">
-                    
-                        <div class="toppinggroup-option all">
-                            <div class="radio">
-                                    <span class="checked">
-                                        <input type="radio" checked="checked" value="All" name="Mozerella">
-                                    </span>
-                            </div>             
-                            <label for="Mozerella_All">
-                                All</label>
-                        </div>
-                        <div class="toppinggroup-option">                                
-                                <input type="checkbox" onchange="javascript:SwapTopping(this, '/PHIndia/Web/NewComplexProduct/SwapTopping?productToppingClass=Topping&amp;productToppingId=55&amp;parentProductToppingGroupId=391&amp;displayOrder=1&amp;sectionId=1&amp;isCombinedLeftRight=False&amp;parentContainerId=complex-product-configurator-place-holder&amp;groupToppingSectioName=Vegetarian','divToppingGroupId_391','divToppingPictureContainedId');" value="Doubled" id="Mozerella_Doubled" name="Mozerella_Doubled">
-                                
-                            <label for="Mozerella_Doubled">
-                                x2</label>
-                        </div>
-                        <div style="" class="toppinggroup-name-remove">
-                            <a href="javascript:RemoveTopping('/PHIndia/Web/NewComplexProduct/RemoveTopping?productToppingClass=Topping&amp;productToppingId=55&amp;parentProductToppingGroupId=391&amp;displayOrder=1&amp;sectionId=1&amp;parentContainerId=complex-product-configurator-place-holder&amp;isCombinedLeftRight=False&amp;groupToppingSectioName=Vegetarian','divToppingGroupId_391','divToppingPictureContainedId');">remove</a>
-                        </div>                    
-                    </div>                
+                                    
                 </div>
                 <div id="divToppingGroupId_392" class="toppinggroup">
-                    <div onclick="javascript:void(0);" class="toppinggroup-name">
+                    <div onClick="javascript:void(0);" class="toppinggroup-name">
                         <div class="toppinggroup-name-title">
                             <div class="radio">
-                                <span>
-                                    <input type="radio" onclick="javascript:SelectTopping(this, '/PHIndia/Web/NewComplexProduct/AddTopping?productToppingId=56&amp;parentProductToppingGroupId=392&amp;currentProductToppingId=56&amp;currentSectionId=1&amp;currentDisplayOrder=1&amp;sectionId=1&amp;parentContainerId=complex-product-configurator-place-holder&amp;productToppingClass=Topping&amp;displayOrder=1&amp;isCombinedLeftRight=False&amp;isDouble=False&amp;isNewSelection=true&amp;groupToppingSectioName=Vegetarian', '/PHIndia/Web/Cache/','divToppingGroupId_392','divToppingPictureContainedId');" value="All">                                    
+                                 <span>
+									<label class="radio text-left">
+									<input type="radio"  value="All" >
+									 (v)Paneer Rs 65.00 
+									</label>
                                 </span>
                             </div>
-                            (v)Paneer
-Rs 45.00                        </div>
+                        </div>
                     </div>                    
                         
-                    <div style="display: none;" class="toppinggroup-options" id="divToppingGroupOptionsId_392">
-                    
-                        <div class="toppinggroup-option all">
-                            <div class="radio">
-                                    <span class="checked">
-                                        <input type="radio" checked="checked" value="All" name="Mozerella">
-                                    </span>
-                            </div>             
-                            <label for="Mozerella_All">
-                                All</label>
-                        </div>
-                        <div class="toppinggroup-option">                                
-                                <input type="checkbox" onchange="javascript:SwapTopping(this, '/PHIndia/Web/NewComplexProduct/SwapTopping?productToppingClass=Topping&amp;productToppingId=56&amp;parentProductToppingGroupId=392&amp;displayOrder=1&amp;sectionId=1&amp;isCombinedLeftRight=False&amp;parentContainerId=complex-product-configurator-place-holder&amp;groupToppingSectioName=Vegetarian','divToppingGroupId_392','divToppingPictureContainedId');" value="Doubled" id="Mozerella_Doubled" name="Mozerella_Doubled">
-                                
-                            <label for="Mozerella_Doubled">
-                                x2</label>
-                        </div>
-                        <div style="" class="toppinggroup-name-remove">
-                            <a href="javascript:RemoveTopping('/PHIndia/Web/NewComplexProduct/RemoveTopping?productToppingClass=Topping&amp;productToppingId=56&amp;parentProductToppingGroupId=392&amp;displayOrder=1&amp;sectionId=1&amp;parentContainerId=complex-product-configurator-place-holder&amp;isCombinedLeftRight=False&amp;groupToppingSectioName=Vegetarian','divToppingGroupId_392','divToppingPictureContainedId');">remove</a>
-                        </div>                    
-                    </div>                
+                                    
                 </div>
                 <div id="divToppingGroupId_393" class="toppinggroup">
-                    <div onclick="javascript:void(0);" class="toppinggroup-name">
+                    <div onClick="javascript:void(0);" class="toppinggroup-name">
                         <div class="toppinggroup-name-title">
                             <div class="radio">
-                                <span>
-                                    <input type="radio" onclick="javascript:SelectTopping(this, '/PHIndia/Web/NewComplexProduct/AddTopping?productToppingId=57&amp;parentProductToppingGroupId=393&amp;currentProductToppingId=57&amp;currentSectionId=1&amp;currentDisplayOrder=1&amp;sectionId=1&amp;parentContainerId=complex-product-configurator-place-holder&amp;productToppingClass=Topping&amp;displayOrder=1&amp;isCombinedLeftRight=False&amp;isDouble=False&amp;isNewSelection=true&amp;groupToppingSectioName=Vegetarian', '/PHIndia/Web/Cache/','divToppingGroupId_393','divToppingPictureContainedId');" value="All">                                    
+                                 <span>
+									<label class="radio text-left">
+									<input type="radio"  value="All" >
+									 (v)Olives Rs 65.00 
+									</label>
                                 </span>
                             </div>
-                            (v)Olives
-Rs 45.00                        </div>
+                        </div>
                     </div>                    
                         
-                    <div style="display: none;" class="toppinggroup-options" id="divToppingGroupOptionsId_393">
-                    
-                        <div class="toppinggroup-option all">
-                            <div class="radio">
-                                    <span class="checked">
-                                        <input type="radio" checked="checked" value="All" name="Mozerella">
-                                    </span>
-                            </div>             
-                            <label for="Mozerella_All">
-                                All</label>
-                        </div>
-                        <div class="toppinggroup-option">                                
-                                <input type="checkbox" onchange="javascript:SwapTopping(this, '/PHIndia/Web/NewComplexProduct/SwapTopping?productToppingClass=Topping&amp;productToppingId=57&amp;parentProductToppingGroupId=393&amp;displayOrder=1&amp;sectionId=1&amp;isCombinedLeftRight=False&amp;parentContainerId=complex-product-configurator-place-holder&amp;groupToppingSectioName=Vegetarian','divToppingGroupId_393','divToppingPictureContainedId');" value="Doubled" id="Mozerella_Doubled" name="Mozerella_Doubled">
-                                
-                            <label for="Mozerella_Doubled">
-                                x2</label>
-                        </div>
-                        <div style="" class="toppinggroup-name-remove">
-                            <a href="javascript:RemoveTopping('/PHIndia/Web/NewComplexProduct/RemoveTopping?productToppingClass=Topping&amp;productToppingId=57&amp;parentProductToppingGroupId=393&amp;displayOrder=1&amp;sectionId=1&amp;parentContainerId=complex-product-configurator-place-holder&amp;isCombinedLeftRight=False&amp;groupToppingSectioName=Vegetarian','divToppingGroupId_393','divToppingPictureContainedId');">remove</a>
-                        </div>                    
-                    </div>                
+                                    
                 </div>
                 <div id="divToppingGroupId_394" class="toppinggroup">
-                    <div onclick="javascript:void(0);" class="toppinggroup-name">
+                    <div onClick="javascript:void(0);" class="toppinggroup-name">
                         <div class="toppinggroup-name-title">
                             <div class="radio">
                                 <span>
-                                    <input type="radio" onclick="javascript:SelectTopping(this, '/PHIndia/Web/NewComplexProduct/AddTopping?productToppingId=58&amp;parentProductToppingGroupId=394&amp;currentProductToppingId=58&amp;currentSectionId=1&amp;currentDisplayOrder=1&amp;sectionId=1&amp;parentContainerId=complex-product-configurator-place-holder&amp;productToppingClass=Topping&amp;displayOrder=1&amp;isCombinedLeftRight=False&amp;isDouble=False&amp;isNewSelection=true&amp;groupToppingSectioName=Vegetarian', '/PHIndia/Web/Cache/','divToppingGroupId_394','divToppingPictureContainedId');" value="All">                                    
+									<label class="radio text-left">
+									<input type="radio"  value="All" >
+									 (v)Jalapenos Rs 65.00 
+									</label>
                                 </span>
                             </div>
-                            (v)Jalapenos
-Rs 45.00                        </div>
+                         </div>
                     </div>                    
                         
-                    <div style="display: none;" class="toppinggroup-options" id="divToppingGroupOptionsId_394">
-                    
-                        <div class="toppinggroup-option all">
-                            <div class="radio">
-                                    <span class="checked">
-                                        <input type="radio" checked="checked" value="All" name="Mozerella">
-                                    </span>
-                            </div>             
-                            <label for="Mozerella_All">
-                                All</label>
-                        </div>
-                        <div class="toppinggroup-option">                                
-                                <input type="checkbox" onchange="javascript:SwapTopping(this, '/PHIndia/Web/NewComplexProduct/SwapTopping?productToppingClass=Topping&amp;productToppingId=58&amp;parentProductToppingGroupId=394&amp;displayOrder=1&amp;sectionId=1&amp;isCombinedLeftRight=False&amp;parentContainerId=complex-product-configurator-place-holder&amp;groupToppingSectioName=Vegetarian','divToppingGroupId_394','divToppingPictureContainedId');" value="Doubled" id="Mozerella_Doubled" name="Mozerella_Doubled">
-                                
-                            <label for="Mozerella_Doubled">
-                                x2</label>
-                        </div>
-                        <div style="" class="toppinggroup-name-remove">
-                            <a href="javascript:RemoveTopping('/PHIndia/Web/NewComplexProduct/RemoveTopping?productToppingClass=Topping&amp;productToppingId=58&amp;parentProductToppingGroupId=394&amp;displayOrder=1&amp;sectionId=1&amp;parentContainerId=complex-product-configurator-place-holder&amp;isCombinedLeftRight=False&amp;groupToppingSectioName=Vegetarian','divToppingGroupId_394','divToppingPictureContainedId');">remove</a>
-                        </div>                    
-                    </div>                
+                                    
                 </div>
                 <div id="divToppingGroupId_395" class="toppinggroup">
-                    <div onclick="javascript:void(0);" class="toppinggroup-name">
+                    <div onClick="javascript:void(0);" class="toppinggroup-name">
                         <div class="toppinggroup-name-title">
                             <div class="radio">
-                                <span>
-                                    <input type="radio" onclick="javascript:SelectTopping(this, '/PHIndia/Web/NewComplexProduct/AddTopping?productToppingId=59&amp;parentProductToppingGroupId=395&amp;currentProductToppingId=59&amp;currentSectionId=1&amp;currentDisplayOrder=1&amp;sectionId=1&amp;parentContainerId=complex-product-configurator-place-holder&amp;productToppingClass=Topping&amp;displayOrder=1&amp;isCombinedLeftRight=False&amp;isDouble=False&amp;isNewSelection=true&amp;groupToppingSectioName=Vegetarian', '/PHIndia/Web/Cache/','divToppingGroupId_395','divToppingPictureContainedId');" value="All">                                    
+                               <span>
+									<label class="radio text-left">
+									<input type="radio"  value="All" >
+									 (v)Baby Corn Rs 65.00 
+									</label>
                                 </span>
                             </div>
-                            (v)Baby Corn
-Rs 45.00                        </div>
+                        </div>
                     </div>                    
                         
-                    <div style="display: none;" class="toppinggroup-options" id="divToppingGroupOptionsId_395">
-                    
-                        <div class="toppinggroup-option all">
-                            <div class="radio">
-                                    <span class="checked">
-                                        <input type="radio" checked="checked" value="All" name="Mozerella">
-                                    </span>
-                            </div>             
-                            <label for="Mozerella_All">
-                                All</label>
-                        </div>
-                        <div class="toppinggroup-option">                                
-                                <input type="checkbox" onchange="javascript:SwapTopping(this, '/PHIndia/Web/NewComplexProduct/SwapTopping?productToppingClass=Topping&amp;productToppingId=59&amp;parentProductToppingGroupId=395&amp;displayOrder=1&amp;sectionId=1&amp;isCombinedLeftRight=False&amp;parentContainerId=complex-product-configurator-place-holder&amp;groupToppingSectioName=Vegetarian','divToppingGroupId_395','divToppingPictureContainedId');" value="Doubled" id="Mozerella_Doubled" name="Mozerella_Doubled">
-                                
-                            <label for="Mozerella_Doubled">
-                                x2</label>
-                        </div>
-                        <div style="" class="toppinggroup-name-remove">
-                            <a href="javascript:RemoveTopping('/PHIndia/Web/NewComplexProduct/RemoveTopping?productToppingClass=Topping&amp;productToppingId=59&amp;parentProductToppingGroupId=395&amp;displayOrder=1&amp;sectionId=1&amp;parentContainerId=complex-product-configurator-place-holder&amp;isCombinedLeftRight=False&amp;groupToppingSectioName=Vegetarian','divToppingGroupId_395','divToppingPictureContainedId');">remove</a>
-                        </div>                    
-                    </div>                
+                                    
                 </div>
                 <div id="divToppingGroupId_396" class="toppinggroup">
-                    <div onclick="javascript:void(0);" class="toppinggroup-name">
+                    <div onClick="javascript:void(0);" class="toppinggroup-name">
                         <div class="toppinggroup-name-title">
                             <div class="radio">
-                                <span>
-                                    <input type="radio" onclick="javascript:SelectTopping(this, '/PHIndia/Web/NewComplexProduct/AddTopping?productToppingId=60&amp;parentProductToppingGroupId=396&amp;currentProductToppingId=60&amp;currentSectionId=1&amp;currentDisplayOrder=1&amp;sectionId=1&amp;parentContainerId=complex-product-configurator-place-holder&amp;productToppingClass=Topping&amp;displayOrder=1&amp;isCombinedLeftRight=False&amp;isDouble=False&amp;isNewSelection=true&amp;groupToppingSectioName=Vegetarian', '/PHIndia/Web/Cache/','divToppingGroupId_396','divToppingPictureContainedId');" value="All">                                    
+                               <span>
+									<label class="radio text-left">
+									<input type="radio"  value="All" >
+									 (v)Sweet Corn Rs 65.00 
+									</label>
                                 </span>
                             </div>
-                            (v)Sweet Corn
-Rs 45.00                        </div>
+                         </div>
                     </div>                    
                         
-                    <div style="display: none;" class="toppinggroup-options" id="divToppingGroupOptionsId_396">
-                    
-                        <div class="toppinggroup-option all">
-                            <div class="radio">
-                                    <span class="checked">
-                                        <input type="radio" checked="checked" value="All" name="Mozerella">
-                                    </span>
-                            </div>             
-                            <label for="Mozerella_All">
-                                All</label>
-                        </div>
-                        <div class="toppinggroup-option">                                
-                                <input type="checkbox" onchange="javascript:SwapTopping(this, '/PHIndia/Web/NewComplexProduct/SwapTopping?productToppingClass=Topping&amp;productToppingId=60&amp;parentProductToppingGroupId=396&amp;displayOrder=1&amp;sectionId=1&amp;isCombinedLeftRight=False&amp;parentContainerId=complex-product-configurator-place-holder&amp;groupToppingSectioName=Vegetarian','divToppingGroupId_396','divToppingPictureContainedId');" value="Doubled" id="Mozerella_Doubled" name="Mozerella_Doubled">
-                                
-                            <label for="Mozerella_Doubled">
-                                x2</label>
-                        </div>
-                        <div style="" class="toppinggroup-name-remove">
-                            <a href="javascript:RemoveTopping('/PHIndia/Web/NewComplexProduct/RemoveTopping?productToppingClass=Topping&amp;productToppingId=60&amp;parentProductToppingGroupId=396&amp;displayOrder=1&amp;sectionId=1&amp;parentContainerId=complex-product-configurator-place-holder&amp;isCombinedLeftRight=False&amp;groupToppingSectioName=Vegetarian','divToppingGroupId_396','divToppingPictureContainedId');">remove</a>
-                        </div>                    
-                    </div>                
+                                    
                 </div>
                 <div id="divToppingGroupId_397" class="toppinggroup">
-                    <div onclick="javascript:void(0);" class="toppinggroup-name">
+                    <div onClick="javascript:void(0);" class="toppinggroup-name">
                         <div class="toppinggroup-name-title">
                             <div class="radio">
                                 <span>
-                                    <input type="radio" onclick="javascript:SelectTopping(this, '/PHIndia/Web/NewComplexProduct/AddTopping?productToppingId=61&amp;parentProductToppingGroupId=397&amp;currentProductToppingId=61&amp;currentSectionId=1&amp;currentDisplayOrder=1&amp;sectionId=1&amp;parentContainerId=complex-product-configurator-place-holder&amp;productToppingClass=Topping&amp;displayOrder=1&amp;isCombinedLeftRight=False&amp;isDouble=False&amp;isNewSelection=true&amp;groupToppingSectioName=Vegetarian', '/PHIndia/Web/Cache/','divToppingGroupId_397','divToppingPictureContainedId');" value="All">                                    
+									<label class="radio text-left">
+									<input type="radio" value="All" >
+									 (v)Red Paprika Rs 65.00 
+									</label>
                                 </span>
                             </div>
-                            (v)Red Paprika
-Rs 45.00                        </div>
-                    </div>                    
-                        
-                    <div style="display: none;" class="toppinggroup-options" id="divToppingGroupOptionsId_397">
-                    
-                        <div class="toppinggroup-option all">
-                            <div class="radio">
-                                    <span class="checked">
-                                        <input type="radio" checked="checked" value="All" name="Mozerella">
-                                    </span>
-                            </div>             
-                            <label for="Mozerella_All">
-                                All</label>
-                        </div>
-                        <div class="toppinggroup-option">                                
-                                <input type="checkbox" onchange="javascript:SwapTopping(this, '/PHIndia/Web/NewComplexProduct/SwapTopping?productToppingClass=Topping&amp;productToppingId=61&amp;parentProductToppingGroupId=397&amp;displayOrder=1&amp;sectionId=1&amp;isCombinedLeftRight=False&amp;parentContainerId=complex-product-configurator-place-holder&amp;groupToppingSectioName=Vegetarian','divToppingGroupId_397','divToppingPictureContainedId');" value="Doubled" id="Mozerella_Doubled" name="Mozerella_Doubled">
-                                
-                            <label for="Mozerella_Doubled">
-                                x2</label>
-                        </div>
-                        <div style="" class="toppinggroup-name-remove">
-                            <a href="javascript:RemoveTopping('/PHIndia/Web/NewComplexProduct/RemoveTopping?productToppingClass=Topping&amp;productToppingId=61&amp;parentProductToppingGroupId=397&amp;displayOrder=1&amp;sectionId=1&amp;parentContainerId=complex-product-configurator-place-holder&amp;isCombinedLeftRight=False&amp;groupToppingSectioName=Vegetarian','divToppingGroupId_397','divToppingPictureContainedId');">remove</a>
-                        </div>                    
-                    </div>                
+                         </div>
+                    </div>                                   
                 </div>
             </div>    
         </div>
@@ -2099,13 +1105,13 @@ Rs 45.00                        </div>
                 
                 <img style="z-index: 1;" alt=" " src="/PHIndia/Web/Assets/PHIN/Images/transparent-pixel.png" id="pizza-topping-overlay-dropped">
             </div>
-<form onsubmit="Sys.Mvc.AsyncForm.handleSubmit(this, new Sys.UI.DomEvent(event), { insertionMode: Sys.Mvc.InsertionMode.replace, onBegin: Function.createDelegate(this, function(data){ShowBusyContainer();}), onComplete: Function.createDelegate(this, function(data){CloseBusyContainer(); RedirectChecking();DisplayRootCategoryViewIfCompleted(data, 'complex-product-configurator-place-holder'); }), onFailure: Function.createDelegate(this, function(data){HandleMSAjaxFailure(data);}) });" onclick="Sys.Mvc.AsyncForm.handleClick(this, new Sys.UI.DomEvent(event));" method="post" id="form0" action="/PHIndia/Web/NewComplexProduct/CompleteComplexProductConfiguration"><input type="hidden" value="complex-product-configurator-place-holder" name="parentContainerId" id="parentContainerId">                <div class="toppings-addorder">
+<form onSubmit="Sys.Mvc.AsyncForm.handleSubmit(this, new Sys.UI.DomEvent(event), { insertionMode: Sys.Mvc.InsertionMode.replace, onBegin: Function.createDelegate(this, function(data){ShowBusyContainer();}), onComplete: Function.createDelegate(this, function(data){CloseBusyContainer(); RedirectChecking();DisplayRootCategoryViewIfCompleted(data, 'complex-product-configurator-place-holder'); }), onFailure: Function.createDelegate(this, function(data){HandleMSAjaxFailure(data);}) });" onClick="Sys.Mvc.AsyncForm.handleClick(this, new Sys.UI.DomEvent(event));" method="post" id="form0" action="/PHIndia/Web/NewComplexProduct/CompleteComplexProductConfiguration"><input type="hidden" value="complex-product-configurator-place-holder" name="parentContainerId" id="parentContainerId">                <div class="toppings-addorder">
                     <div class="toppings-addorder-text">
                         <div class="toppings-quantity">
                             <span>Quantity:</span>
             
-                                <input type="button" value="-" onclick="QuantityUpDown.Decrement({inputField: 'Quantity'})" class="QuantityUpDownButton">
-<input type="text" value="1" name="Quantity" maxlength="2" id="Quantity" class="inputTwentyFive numericbasketqty">                                <input type="button" value="+" onclick="QuantityUpDown.Increment({inputField: 'Quantity'})" class="QuantityUpDownButton">
+                                <input type="button" value="-" onClick="QuantityUpDown.Decrement({inputField: 'Quantity'})" class="QuantityUpDownButton">
+<input type="text" value="1" name="Quantity" maxlength="2" id="Quantity" class="inputTwentyFive numericbasketqty" style="width:20px;">                                <input type="button" value="+" onClick="QuantityUpDown.Increment({inputField: 'Quantity'})" class="QuantityUpDownButton">
 Rs 225.00                        </div>
                         <div class="small-btnTwo">
                             <div class="button-wrapper"><div class="clear"></div><div class="button-start"></div><div class="button-container"><input type="submit" value="Add to Order" name="btnAddToBasket" id="btnAddToBasket" class=""></div><div class="button-end"></div><div class="clear"></div></div> 
@@ -2113,7 +1119,12 @@ Rs 225.00                        </div>
                     </div>
                 </div>
 </form>            
-    </div>      
+    </div> 
+	
+	<div style="color:#fff;">ThisistextdivThisistextdivThisistextdivThisistextdivThisistextdivThisistextdivThisistextdivThisistextdivThisistextdivThisistextdivThisistextdiv</div>
+	
+	</div>
+	 
     <div class="clear">
     </div>
     <br>
@@ -2145,17 +1156,15 @@ Rs 225.00                        </div>
 				<div class="slideToggleDeliveryDetailInfo margin-bottom20" style="display:none;">
 					<div class="order-box-outer">
 						<div class="order-box-details">
-							<div class="order-box-text-one"> You have selected <h3>Pick up</h3></div>
+							<div class="order-box-text-one"> You have selected <h3>Pick Up</h3></div>
 						</div>
+						<br/><br/><br/>
 						<!-- This div to be populated with future order details... calendar, time etc..-->
 
-						<div class="order-box-address">
+						<div class="order-box-address" id="">
 							<span class="store-detail-heading">Your Neighboring Hut</span><br>
-							<div class="buildingname">Ground Floor</div> 
-							<div class="streetname">City Gold Multiplex</div> 
-							<div class="towncity">Ahmedabad</div> 
-							<div class="territory">India</div> 
-							<div class="postcodeorzip">Ashram Road</div> 
+							<div id="order-box-address"></div>
+							<div class="postcodeorzip">Phone:</div> 
 							<div class="telephone">+91 79 39883988</div>
 				
 						</div>
@@ -2164,11 +1173,7 @@ Rs 225.00                        </div>
 					
 					</div>
 				</div>
-			
-			
-	
-			
-			
+
 <!--script for toggle div	-->		
 <script type="text/javascript">
 	$("#slideToggleAccount").click(function () {
@@ -2179,14 +1184,7 @@ Rs 225.00                        </div>
 	   $('.slideToggleDeliveryDetailInfo').slideToggle();
 	});
 </script>
-			
 
-
-
-
-
-			
-			
 	<!--		<script language="javascript"> 
 function toggle() {
 	var ele = document.getElementById("toggleText");
