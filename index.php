@@ -17,265 +17,14 @@
 <script src="backbone/json2.js"></script>
 <script src="backbone/underscore.js"></script>
 <script src="backbone/backbone-min.js"></script>
+<script src="js/QuantityUpDown.js"></script>
 
 <!--for json array-->
 <script type="text/javascript" src="json/formjs.js"></script>
 <script type="text/javascript" src="json/js2form.js"></script>
 <script type="text/javascript" src="json/json.js"></script>
+<script type="text/javascript" src="js/script.js"></script> 
 
-
-<script type="text/javascript">
-	// submit location form
-	function frmCollectionSubmit()
-	{ 
-		var flg = 1;
-		// validate form from Backbone JS
-		if($("input:radio[id='collectionAddressModeLocalisation']").is(":checked")) {
-		
-			var Order = Backbone.Model.extend({ 
-			  validate: function(attrs, options) {
-				if (attrs.TownCity == '') {
-				  return "TownCity";
-				}else
-				if (attrs.District == '') {
-				  return "District";
-				}else{
-					 return "Success";
-				}
-			  }
-			});
-			
-			var one = new Order({
-			  title : "Success"
-			});
-			
-			one.on("invalid", function(model, error) {
-				if(error != ''){
-					flg =0;
-					if(error == "TownCity")	$("#TownCityError" ).html("can't be null!");
-					else if(error == "District"){$("#DistrictError" ).html("can't be null!"); $("#TownCityError" ).html("");}
-					else flg =1;
-				}			
-			 // alert(model.get("title") + " " + error + flg);
-			});
-			// assign the value
-			one.save({
-			  TownCity: $("#TownCity" ).val(),
-			  District:  $("#District" ).val()
-			});
-			
-		}
-		
-		if(flg == 1){
-			// convert to json
-			var formData = form2js('frmCollection', '.', true,
-			function(node)
-			{
-				if (node.id && node.id.match(/callbackTest/))
-				{
-					return { name: node.id, value: node.innerHTML };
-				}
-			});
-	
-			document.getElementById('testArea').innerHTML = JSON.stringify(formData, null, '\t');
-			document.getElementById('location-val').value = JSON.stringify(formData, null, '\t');
-			
-			$('div#mainFirstDiv', this.el).hide();
-			$('div#location_detail', this.el).show();	
-			
-			// get json elements into form elements
-			populateForm();
-		
-			Address = Backbone.Model.extend({});
-		
-			AddressCollection = Backbone.Collection.extend({
-				model: Address
-			});
-			
-			var jsonString = $("#location-val" ).val();
-
-			var addressArray = JSON.parse(jsonString);
-			var addressCollection = new AddressCollection(addressArray);
-			addressCollection.fetch();
-			//alert(JSON.stringify(addressCollection));
-			
-			 _.each(addressCollection.models, function (msg) {
-			 	if(msg.get("addressMode") == "option1"){
-					$( "#inputted-address" ).html( msg.get("locationSelected") + ", India");
-					$( "#inputted-address-hut" ).html( msg.get("locationSelected")+ "<br/> India" );
-					$( "#order-box-address" ).html( msg.get("locationSelected")+ "<br/> India" );
-				}else{
-					$( "#inputted-address" ).html( msg.get("District")+ ", " + msg.get("TownCity"));
-					$( "#inputted-address-hut" ).html( msg.get("District")+ "<br/> " + msg.get("TownCity") + "<br/> India" );
-					$( "#order-box-address" ).html( msg.get("District")+ "<br/> " + msg.get("TownCity") + "<br/> India" );
-
-				}
-			// alert("code => "+ msg.get("addressMode") +", message => "+ msg.get("locationSelected"));
-			 // console.log( "code => "+ msg.get("addressMode") +", message => "+ msg.get("addressMode"));
-			 });
-			 
-			  var ListAddress = Backbone.View.extend({
-			    el: $('div#featureSectiom'), // el attaches to existing element
-			  	events: {
-				  'click span#storedetail-change-link': 'showMain'
-				},
-				
-				 initialize: function(){
-				  //this.showMain();
-				},
-				
-				 showMain: function(){
-				  $('div#mainFirstDiv', this.el).show();
-				  $('div#location_detail', this.el).hide();
-				}
-							
-			  });
-			  
-			   var listAddress = new ListAddress();
-		
-		}
-	}
-	// convert json  to form value
-	function populateForm()
-	{
-		var data = document.getElementById('location-val').value;
-		data = JSON.parse(data);
-		js2form(document.getElementById('pickupAddress'), data);
-	}
-	
-	
-	// founction to submit order and get listing page of items
-	function frmConfirmOrderSubmit()
-	{
-		$('div#mainLocationContainer', this.el).hide();
-		$('div#listingContainer', this.el).show();	
-		$('div#viewProductCollectionDiv', this.el).show();
-		$('div#viewProductDetailDiv', this.el).hide();	
-		
-		$('#start-over').click(function() {
-			$('div#listingContainer', this.el).hide();
-			$('div#location_detail', this.el).hide();
-			$('div#mainFirstDiv', this.el).show();	
-			$('div#mainLocationContainer', this.el).show();	
-			$('div#mainDivDelPickup', this.el).show();	
-		});
-				
-		
-		var formData = form2js('frmConfirmOrder', '.', true,
-				function(node)
-				{
-					if (node.id && node.id.match(/callbackTest/))
-					{
-						return { name: node.id, value: node.innerHTML };
-					}
-				});
-				
-		$( "#testArea" ).append( JSON.stringify(formData, null, '\t') );
-		$( "#time-val" ).val( JSON.stringify(formData, null, '\t') );
-			
-
-		/*Person = Backbone.Model.extend({
-	
-		});
-		
-		PersonCollection = Backbone.Collection.extend({
-			model: Person
-		});
-		
-		//var jsonString = $("#testArea" ).html();
-		var jsonString = $("#location-val" ).val();
-		alert (jsonString);
-			
-		
-		var people = JSON.parse(jsonString);
-		var personCollection = new PersonCollection(people);
-		personCollection.fetch();
-		alert(JSON.stringify(personCollection));
-		
-		 _.each(personCollection.models, function (msg) {
-		 alert("code => "+ msg.get("addressMode") +", message => "+ msg.get("locationSelected"));
-		 
-		 
-      	 // console.log( "code => "+ msg.get("addressMode") +", message => "+ msg.get("addressMode"));
-   		 });
-		
-		//window.alert( "Collection has: " + personCollection.length + " items");*/
-		
-	
-	}
-	
-	function frmViewProductSubmit(id)
-	{ 
-		$('div#viewProductCollectionDiv', this.el).hide();
-		$('div#viewProductDetailDiv', this.el).show();	
-		
-		var formData = form2js('frmListingCollection'+id, '.', true,
-				function(node)
-				{
-					if (node.id && node.id.match(/callbackTest/))
-					{
-						return { name: node.id, value: node.innerHTML };
-					}
-				});
-				
-		$( "#testArea" ).append( JSON.stringify(formData, null, '\t') );
-		$( "#selected-pizza-item" ).val( JSON.stringify(formData, null, '\t') );
-		
-			PizzaItem = Backbone.Model.extend({});
-		
-			PizzaItemCollection = Backbone.Collection.extend({
-				model: PizzaItem
-			});
-			
-			var jsonString = $("#selected-pizza-item" ).val();
-
-			var itemArray = JSON.parse(jsonString);
-			var pizzaItemCollection = new PizzaItemCollection(itemArray);
-			//addressCollection.fetch();
-			
-			 _.each(pizzaItemCollection.models, function (msg) {
-			 	$( "#item-name" ).html( msg.get("productName"+msg.get("productNumber")));
-			 
-			 	
-			// alert("code => "+ msg.get("addressMode") +", message => "+ msg.get("locationSelected"));
-			 // console.log( "code => "+ msg.get("addressMode") +", message => "+ msg.get("addressMode"));
-			 });
-	}
-	
-	
-	
-	$(document).ready(function() {
-		var location_val = $('#SelectedStoreId option:selected').html();
-		$("#location-selected-val" ).val(location_val);
-		
-		$( "#SelectedStoreId" ).change(function() {
-			$("#location-selected-val" ).val($('#SelectedStoreId option:selected').html()); 
-		});
-		
-		
-		$('#toggle2').click(function() {
-			$('.toggle2').toggle();
-			return false;
-		});
-		
-		
-		$('#IsCurrentOrderSelected').click(function(){
-			if($("#IsCurrentOrderSelected").is(':checked') == true){
-				$('input:checkbox[id=IsFutureOrderSelected]').attr('checked',false);
-			}
-		});
-		
-		$('#IsFutureOrderSelected').click(function(){
-			if($("#IsFutureOrderSelected").is(':checked') == true){
-				$('input:checkbox[id=IsCurrentOrderSelected]').attr('checked',false);
-			}
-		});
-
-					
-	});
-	
-				
-</script> 
 </head>
 <body id="body">
 <pre><code id="testArea"></code>
@@ -283,6 +32,7 @@
 <input type="hidden" id="location-val" >
 <input type="hidden" id="time-val" >
 <input type="hidden" id="selected-pizza-item" >
+<input type="hidden" id="ordered-pizza-item" >
 
 
 	<form id="pickupAddress" style="display:none;" >
@@ -657,12 +407,12 @@ Store Search
 							   <span>Later</span>
 								<br>
 								<br> 
-								<?php  $curr_hr = date('H'); $curr_mins = date('i'); ?>
+								<?php   $curr_hr = date('H'); $curr_mins = date('i'); ?>
 								<select name="timeSelectedOrderTime" id="SelectedOrderTime" style="width:100px;">
 								<?php 
 									for ($h=$curr_hr;$h<=23;$h++){
+										if($h<=9 ) {if($h != $curr_hr){$h="0".$h;}}
 										for ($m=0;$m<60;$m++){
-										if($h<=9 ) {$h="0".$h;}
 										if($m<=9 ) {$m="0".$m;}
 										
 									?>
@@ -725,6 +475,7 @@ Store Search
 		
 		<!-- 4th page : detail of products -->	
 		<div class="span10 margin-left0 width930" id="viewProductDetailDiv" style="display:none;">
+		<form id="frmAddProductSubmitDetail" action="javascript:frmAddProductSubmit()" >
 			<div class="productDetailDiv" >
 				<div id="main-products">
     <input type="hidden" value="" name="hdnProductQuantity" id="hdnProductQuantity">
@@ -778,7 +529,7 @@ Store Search
                             <div class="radio">
                                 <span>
 									<label class="radio text-left">
-									<input type="radio"  value="All" >
+									<input type="radio"  value="Cheese Rs 65.00" name="cheese" class="radioClass" >
 									Cheese Rs 65.00 
 									</label>
                                           
@@ -794,302 +545,49 @@ Store Search
             <div class="toppingsheading">
                 Non Veg Toppings
             </div>
-
+			 <?php for ($i=0;$i<5;$i++) { ?>
                 <div id="divToppingGroupId_398" class="toppinggroup">
                     <div onClick="javascript:void(0);" class="toppinggroup-name">
                         <div class="toppinggroup-name-title">
                             <div class="radio">
                                 <span>
 									<label class="radio text-left">
-									<input type="radio"  value="All" >
-									 Chunky Chicken Rs 65.00 
+									<input type="radio"  value="Chunky Chicken Type <?php echo $i;?> Rs 65.00" name="nonVegToppings<?php echo $i;?>" class="radioClass" >
+									 Chunky Chicken Type <?php echo $i;?> Rs 65.00 
 									</label>
                                    
                                 </span>
                             </div>
                        </div>
-                    </div>                    
-                        
-                                    
+                    </div>                                  
                 </div>
-                <div id="divToppingGroupId_399" class="toppinggroup">
-                    <div onClick="javascript:void(0);" class="toppinggroup-name">
-                        <div class="toppinggroup-name-title">
-                            <div class="radio">
-                                <span>
-									<label class="radio text-left">
-									<input type="radio"  value="All" >
-									 Chicken HotnSpicey Rs 65.00 
-									</label>
-                                    
-                                </span>
-                            </div>
-                         </div>
-                    </div>                    
-                        
-                                    
-                </div>
-                <div id="divToppingGroupId_400" class="toppinggroup">
-                    <div onClick="javascript:void(0);" class="toppinggroup-name">
-                        <div class="toppinggroup-name-title">
-                            <div class="radio">
-                                 <span>
-									<label class="radio text-left">
-									<input type="radio"  value="All" >
-									 Chicken Tikka Rs 65.00 
-									</label>
-                                    
-                                </span>
-                            </div>
-                  		 </div>
-                    </div>                    
-                        
-                    
-					                
-                </div>
-                <div id="divToppingGroupId_402" class="toppinggroup">
-                    <div onClick="javascript:void(0);" class="toppinggroup-name">
-                        <div class="toppinggroup-name-title">
-                            <div class="radio">
-                                 <span>
-									<label class="radio text-left">
-									<input type="radio"  value="All" >
-									 CheesenOnion Rs 65.00 
-									</label>
-                                </span>
-                            </div>
- 					   </div>
-                    </div>                    
-                                    
-                </div>
-                <div id="divToppingGroupId_404" class="toppinggroup">
-                    <div onClick="javascript:void(0);" class="toppinggroup-name">
-                        <div class="toppinggroup-name-title">
-                            <div class="radio">
-                               <span>
-									<label class="radio text-left">
-									<input type="radio"  value="All" >
-									 Kadai Chicken Rs 65.00 
-									</label>
-                                </span>
-                            </div>
-                          </div>
-                    </div>                    
-                        
-                                    
-                </div>
-                <div id="divToppingGroupId_877" class="toppinggroup">
-                    <div onClick="javascript:void(0);" class="toppinggroup-name">
-                        <div class="toppinggroup-name-title">
-                            <div class="radio">
-                                 <span>
-									<label class="radio text-left">
-									<input type="radio"  value="All" >
-									 Pepperoni Rs 65.00 
-									</label>
-                                </span>
-                            </div>
-  			           </div>
-                    </div>                    
-                        
-                                    
-                </div>
+				 <?php } ?>
+				
+               
 			</div>
 			<div id="veg-topping">
             <div class="toppingsheading">
                 Veg Toppings
             </div>
-
+			
+			 <?php for ($i=0;$i<10;$i++) { ?>
                 <div id="divToppingGroupId_386" class="toppinggroup">
                     <div onClick="javascript:void(0);" class="toppinggroup-name">
                         <div class="toppinggroup-name-title">
                             <div class="radio">
                                  <span>
 									<label class="radio text-left">
-									<input type="radio"  value="All" >
-									 (v)Capsicum Rs 65.00 
+									<input type="radio"  value="(v)Capsicum Type <?php echo $i;?> Rs 65.00" name="vegToppings<?php echo $i;?>"  class="radioClass" >
+									 (v)Capsicum Type <?php echo $i;?>  Rs 65.00 
 									</label>
                                 </span>
                             </div>
                          </div>
-                    </div>                    
-                        
-                                    
+                    </div>                                    
                 </div>
-                <div id="divToppingGroupId_387" class="toppinggroup">
-                    <div onClick="javascript:void(0);" class="toppinggroup-name">
-                        <div class="toppinggroup-name-title">
-                            <div class="radio">
-                                <span>
-									<label class="radio text-left">
-									<input type="radio"  value="All" >
-									 (v)Onion Rs 65.00 
-									</label>
-                                </span>
-                            </div>
-                         </div>
-                    </div>                    
-                        
-                                    
-                </div>
-                <div id="divToppingGroupId_388" class="toppinggroup">
-                    <div onClick="javascript:void(0);" class="toppinggroup-name">
-                        <div class="toppinggroup-name-title">
-                            <div class="radio">
-                               <span>
-									<label class="radio text-left">
-									<input type="radio"  value="All" >
-									 (v)Tomato Rs 65.00 
-									</label>
-                                </span>
-                            </div>
-                         </div>
-                    </div>                    
-                        
-                                    
-                </div>
-                <div id="divToppingGroupId_389" class="toppinggroup">
-                    <div onClick="javascript:void(0);" class="toppinggroup-name">
-                        <div class="toppinggroup-name-title">
-                            <div class="radio">
-                                <span>
-									<label class="radio text-left">
-									<input type="radio"  value="All" >
-									 (v)Green Chillies Rs 65.00 
-									</label>
-                                </span>
-                            </div>
-                          </div>
-                    </div>                    
-                        
-                                    
-                </div>
-                <div id="divToppingGroupId_390" class="toppinggroup">
-                    <div onClick="javascript:void(0);" class="toppinggroup-name">
-                        <div class="toppinggroup-name-title">
-                            <div class="radio">
-                                <span>
-									<label class="radio text-left">
-									<input type="radio"  value="All" >
-									 (v)Mushroom Rs 65.00 
-									</label>
-                                </span>
-                            </div>
-                        </div>
-                    </div>                    
-                        
-                                    
-                </div>
-                <div id="divToppingGroupId_391" class="toppinggroup">
-                    <div onClick="javascript:void(0);" class="toppinggroup-name">
-                        <div class="toppinggroup-name-title">
-                            <div class="radio">
-                                 <span>
-									<label class="radio text-left">
-									<input type="radio"  value="All" >
-									 (v)Red Capsicum Rs 65.00 
-									</label>
-                                </span>
-                            </div>
-                         </div>
-                    </div>                    
-                        
-                                    
-                </div>
-                <div id="divToppingGroupId_392" class="toppinggroup">
-                    <div onClick="javascript:void(0);" class="toppinggroup-name">
-                        <div class="toppinggroup-name-title">
-                            <div class="radio">
-                                 <span>
-									<label class="radio text-left">
-									<input type="radio"  value="All" >
-									 (v)Paneer Rs 65.00 
-									</label>
-                                </span>
-                            </div>
-                        </div>
-                    </div>                    
-                        
-                                    
-                </div>
-                <div id="divToppingGroupId_393" class="toppinggroup">
-                    <div onClick="javascript:void(0);" class="toppinggroup-name">
-                        <div class="toppinggroup-name-title">
-                            <div class="radio">
-                                 <span>
-									<label class="radio text-left">
-									<input type="radio"  value="All" >
-									 (v)Olives Rs 65.00 
-									</label>
-                                </span>
-                            </div>
-                        </div>
-                    </div>                    
-                        
-                                    
-                </div>
-                <div id="divToppingGroupId_394" class="toppinggroup">
-                    <div onClick="javascript:void(0);" class="toppinggroup-name">
-                        <div class="toppinggroup-name-title">
-                            <div class="radio">
-                                <span>
-									<label class="radio text-left">
-									<input type="radio"  value="All" >
-									 (v)Jalapenos Rs 65.00 
-									</label>
-                                </span>
-                            </div>
-                         </div>
-                    </div>                    
-                        
-                                    
-                </div>
-                <div id="divToppingGroupId_395" class="toppinggroup">
-                    <div onClick="javascript:void(0);" class="toppinggroup-name">
-                        <div class="toppinggroup-name-title">
-                            <div class="radio">
-                               <span>
-									<label class="radio text-left">
-									<input type="radio"  value="All" >
-									 (v)Baby Corn Rs 65.00 
-									</label>
-                                </span>
-                            </div>
-                        </div>
-                    </div>                    
-                        
-                                    
-                </div>
-                <div id="divToppingGroupId_396" class="toppinggroup">
-                    <div onClick="javascript:void(0);" class="toppinggroup-name">
-                        <div class="toppinggroup-name-title">
-                            <div class="radio">
-                               <span>
-									<label class="radio text-left">
-									<input type="radio"  value="All" >
-									 (v)Sweet Corn Rs 65.00 
-									</label>
-                                </span>
-                            </div>
-                         </div>
-                    </div>                    
-                        
-                                    
-                </div>
-                <div id="divToppingGroupId_397" class="toppinggroup">
-                    <div onClick="javascript:void(0);" class="toppinggroup-name">
-                        <div class="toppinggroup-name-title">
-                            <div class="radio">
-                                <span>
-									<label class="radio text-left">
-									<input type="radio" value="All" >
-									 (v)Red Paprika Rs 65.00 
-									</label>
-                                </span>
-                            </div>
-                         </div>
-                    </div>                                   
-                </div>
+				<?php } ?>
+                
+                
             </div>    
         </div>
 
@@ -1099,34 +597,28 @@ Store Search
     <div id="divToppingPictureContainedId" class="toppings-pic">
             <img alt=" " src="/PHIndia/Web/Cache/470_Product_Small_Image_en-GB.jpg" class="toppings-pic-img">
             <div id="pizza-topping-overlay-container">
-                <div class="toppings-picheading">YOUR PIZZA</div>
-           
-                
-                
-                <img style="z-index: 1;" alt=" " src="/PHIndia/Web/Assets/PHIN/Images/transparent-pixel.png" id="pizza-topping-overlay-dropped">
+
             </div>
-<form onSubmit="Sys.Mvc.AsyncForm.handleSubmit(this, new Sys.UI.DomEvent(event), { insertionMode: Sys.Mvc.InsertionMode.replace, onBegin: Function.createDelegate(this, function(data){ShowBusyContainer();}), onComplete: Function.createDelegate(this, function(data){CloseBusyContainer(); RedirectChecking();DisplayRootCategoryViewIfCompleted(data, 'complex-product-configurator-place-holder'); }), onFailure: Function.createDelegate(this, function(data){HandleMSAjaxFailure(data);}) });" onClick="Sys.Mvc.AsyncForm.handleClick(this, new Sys.UI.DomEvent(event));" method="post" id="form0" action="/PHIndia/Web/NewComplexProduct/CompleteComplexProductConfiguration"><input type="hidden" value="complex-product-configurator-place-holder" name="parentContainerId" id="parentContainerId">                <div class="toppings-addorder">
+               <div class="toppings-addorder">
                     <div class="toppings-addorder-text">
                         <div class="toppings-quantity">
                             <span>Quantity:</span>
             
-                                <input type="button" value="-" onClick="QuantityUpDown.Decrement({inputField: 'Quantity'})" class="QuantityUpDownButton">
-<input type="text" value="1" name="Quantity" maxlength="2" id="Quantity" class="inputTwentyFive numericbasketqty" style="width:20px;">                                <input type="button" value="+" onClick="QuantityUpDown.Increment({inputField: 'Quantity'})" class="QuantityUpDownButton">
+                                <input type="button" value="-" onClick="QuantityUpDown.Decrement({inputField: 'Quantity'})" class="QuantityUpDownButton btn btn-danger">
+<input type="text" value="1" name="Quantity" maxlength="2" id="Quantity" class="inputTwentyFive numericbasketqty" style="width:20px;margin:0;height:15px;">                                <input type="button" value="+" onClick="QuantityUpDown.Increment({inputField: 'Quantity'})" class="QuantityUpDownButton btn btn-danger">
 Rs 225.00                        </div>
                         <div class="small-btnTwo">
-                            <div class="button-wrapper"><div class="clear"></div><div class="button-start"></div><div class="button-container"><input type="submit" value="Add to Order" name="btnAddToBasket" id="btnAddToBasket" class=""></div><div class="button-end"></div><div class="clear"></div></div> 
+                            <div class="button-wrapper"><div class="clear"></div><div class="button-start"></div><div class="button-container"><input type="submit" value="Add to Order" name="btnAddToBasket" id="btnAddToBasket" class="btn btn-success margin-add-button"></div><div class="button-end"></div><div class="clear"></div></div> 
                         </div>  
                     </div>
                 </div>
-</form>            
+       
     </div> 
 	
-	<div style="color:#fff;">ThisistextdivThisistextdivThisistextdivThisistextdivThisistextdivThisistextdivThisistextdivThisistextdivThisistextdivThisistextdivThisistextdiv</div>
 	
 	</div>
 	 
-    <div class="clear">
-    </div>
+    <div class="clear"></div>
     <br>
     <br>      
     <div id="last">
@@ -1134,23 +626,42 @@ Rs 225.00                        </div>
 </div>
 		
 		</div>
+		
+		</form>
 		</div>
 		
 		<!-- end 4th page : detail of products -->	
+		
+		
+		<div class="span10 margin-left0 width930" id="orderProductDetailDiv" style="display:none;">
+			<div class="productDetailDiv" >
+			fgfdgdfg
+			</div>
+		</div>
 		
 		<div class="span2 margin-left0 width247 account-detail">
 			<div class="account-head">ACCOUNT DETAIL</div>
 							
 			<div class="account-detail-main">
-				<div class="account-slid margin-bottom20 text-left"  id="slideToggleAccount">&nbsp;&nbsp;&nbsp;&nbsp;YOUR ORDER</div>
-				<div class="slideToggleAccountInfo margin-bottom20" style="display:none;">
-					<div class="order-box-subtitle-image">
-					<strong>
-						Your cart is currently empty.
-						<br>
-						Start ordering now!
-					</strong><br><br></div>
-				
+				<div id="yourOrderDiv">
+					<div class="account-slid margin-bottom20 text-left"  id="slideToggleAccount">&nbsp;&nbsp;&nbsp;&nbsp;YOUR ORDER</div>
+					<div class="slideToggleAccountInfo margin-bottom20" style="display:none;">
+						<div id="emptyCart">
+						<strong>
+							Your cart is currently empty.
+							<br>
+							Start ordering now!
+						</strong><br><br></div>
+						
+						<div id="cartItemDetailDiv" style="display:none;" >
+							<div id="cartItemDetail" > </div>
+							<div id="divOrderCouponTextInMiniBasket">
+							Please note that coupon will be applied in order review page.
+							</div>
+							<div class="red-btn"><span class="btn btn-success" id="checkout-now">CHECKOUT NOW</span></div>
+						</div>
+					
+					</div>
 				</div>
 				<div class="account-slid margin-bottom20"  id="slideToggleDeliveryDetail">DELIVERY OR PICK UP DETAILS</div>
 				<div class="slideToggleDeliveryDetailInfo margin-bottom20" style="display:none;">

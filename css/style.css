@@ -82,6 +82,7 @@ margin-bottom:20px;
 	background-color:#fff;
 	border-radius:10px;
 	text-align:left;
+	min-height:955px;
 }
 .choose-basics{
 	background-color:#FFE09D;
@@ -133,8 +134,25 @@ margin-bottom:20px;
 	font-size: 15px;
     font-weight: bold;
 }
+.toppings-addorder{
+	margin:80px 0 0 80px;
+}
+.margin-add-button{
+	margin: 30px 0 30px 56px; 
+}
+#divOrderCouponTextInMiniBasket {
+    border-bottom: 1px solid #C8AA68;
+    border-top: 1px solid #C8AA68;
+    color: #000000;
+    float: left;
+    font-size: 11px;
+    margin: 10px ;
+    padding: 5px 0 5px 7px;
+    text-align:left
+}
 
-
-
-
-
+#cartItemDetailDiv{
+	border-radius:10px;
+	background-color:#F3C86A;
+	padding: 10px 0 ;
+}
