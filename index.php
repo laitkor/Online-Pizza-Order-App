@@ -27,22 +27,20 @@
 
 </head>
 <body id="body">
-<pre><code id="testArea"></code>
+<pre style="display:none;"><code id="testArea"></code>
 </pre>
 <input type="hidden" id="location-val" >
 <input type="hidden" id="time-val" >
 <input type="hidden" id="selected-pizza-item" >
 <input type="hidden" id="ordered-pizza-item" >
+<input type="hidden" id="counterValue" >
 
-
-	<form id="pickupAddress" style="display:none;" >
+	<!--<form id="pickupAddress" style="display:none;" >
 		<input type="text" name="locationSelected" value="">
 		<input type="text" name="TownCity" value="">
 		<input type="text" name="District" value="">
 		<input type="text" name="addressMode" value="">
-		
-
-	</form>
+	</form>-->
 
 <section id="bodySection">
 	<div id="featureSectiom">
@@ -63,7 +61,6 @@
                         <div style="display: none;" id="CollectionForm">
 <div id="storeLocatoreCollectionPlaceHolder">
 <form id="frmCollection" action="javascript:frmCollectionSubmit()" >
-<!--<form id="frmCollection">-->
 <div>
 
 <label class="radio text-left">
@@ -72,7 +69,6 @@ Store Search
 </label>
             <div id="postcode-container">
                 <fieldset>
-                   <!-- <legend></legend>-->
                     <div>
                         <div class="editor-label"><label class="popup-heading-black" for="SelectedStore">Store</label></div>
                         <div class="editor-field">
@@ -205,7 +201,6 @@ Store Search
 
 <div id="address-container" style="display: none;">
     <fieldset>
-       <!-- <legend></legend>-->
 
 	<div>
 	   
@@ -240,24 +235,23 @@ Store Search
                             <div class="header1">
                                 Your Address
                             </div>
-                            <div id="deliveryviewcontainer">
+<div id="deliveryviewcontainer">
 
 <div>
 <form method="post" id="frmDelivery" >
 <div>
 <div id="address-container">
     <fieldset>
-        <!--<legend></legend>-->
-<div>
-    
-    <div class="editor-field">
-        <input type="text" class="focused" placeholder="Type / Select City" title="City" name="TownCity" id="TownCity">  
-        <div class="error">
-                <span data-valmsg-replace="true" data-valmsg-for="TownCity" class="field-validation-valid"></span>     
-            
-        </div> 
-    </div>
-</div>
+	<div>
+		
+		<div class="editor-field">
+			<input type="text" class="focused" placeholder="Type / Select City" title="City" name="TownCity" id="TownCity">  
+			<div class="error">
+					<span data-valmsg-replace="true" data-valmsg-for="TownCity" class="field-validation-valid"></span>     
+				
+			</div> 
+		</div>
+	</div>
 <div>
     
     <div class="editor-field">
@@ -458,12 +452,13 @@ Store Search
 		   <form id="frmListingCollection<?php echo $i;?>" action="javascript:frmViewProductSubmit(<?php echo $i;?>)" >
 			<input type="hidden" name="productName<?php echo $i;?>" value="Italian Treat test <?php echo $i;?>" >
 			<input type="hidden" name="productNumber" value="<?php echo $i;?>" >
+			<input type="hidden" name="btnHdnName<?php echo $i;?>" value="btnViewProduct<?php echo $i;?>" >
 				<div class="Famous-box-img">
 					<img alt="Italian Treat BP" src="images/pizza_1.jpg">
 				</div>
 				<div class="Famous-box-titles">Italian Treat test <?php echo $i;?>  </div>
 				<div class="Famous-box-normalproductform">
-	<div class="small-btn"><div class="small-btn-top"></div><div class="small-btn-left"></div><div class="small-btn-middle"><input type="submit" value="Customize &amp; Add"  name="btnViewProduct<?php echo $i;?>" id="btnViewProduct<?php echo $i;?>" class="btn btn-success"></div><div class="small-btn-right"></div><div class="small-btn-base"></div></div>               </div>
+	<div class="small-btn"><div class="small-btn-top"></div><div class="small-btn-left"></div><div class="small-btn-middle"><input type="submit" value="Customize &amp; Add"  name="btnViewProduct<?php echo $i;?>" id="btnViewProduct<?php echo $i;?>" class="btn btn-success btnViewProduct"></div><div class="small-btn-right"></div><div class="small-btn-base"></div></div>               </div>
 			</form>
 			</div>
 		
@@ -478,12 +473,13 @@ Store Search
 		<form id="frmAddProductSubmitDetail" action="javascript:frmAddProductSubmit()" >
 			<div class="productDetailDiv" >
 				<div id="main-products">
-    <input type="hidden" value="" name="hdnProductQuantity" id="hdnProductQuantity">
+    
 
 
     <div class="basics">
         <div class="choose-recipie">
            <h3 id="item-name"> </h3>
+		   <input type="hidden" value="" name="hdnProductName" id="hdnProductName">
         </div>
             
         <div class="toppings-background">    
@@ -492,10 +488,16 @@ Store Search
         </div>
 		
         <div class="basics-options">
-                <select onChange="" name="ddlBaseSelected" id="ddlBaseSelected"><option value="6" selected="selected">Big Pizza</option>
-</select>       
-				 <select name="ddlSizeSelected" id="ddlSizeSelected"><option value="4" selected="selected">Medium(Serves 2)</option>
-</select>         
+                <select  name="ddlBaseSelected" id="ddlBaseSelected">
+					<option value="Big Pizza" selected="selected">Big Pizza</option>
+					<option value="Small Pizza" >Small Pizza</option>
+				</select>       
+				 <select name="ddlSizeSelected" id="ddlSizeSelected">
+				 	<option value="Personal" >Personal(Serves 1)</option>
+				 	<option value="Medium" selected="selected">Medium(Serves 2)</option>
+				</select>         
+				
+				<input type="hidden" value="65.00" name="itemPrice" id="itemPrice" >
         </div>        
         
     </div>
@@ -506,7 +508,7 @@ Store Search
                 Add / Remove Toppings
             </span>
 			 <span class="toppings-reset">
-				<a class="reset" href="#">Reset</a>
+				<span class="reset" id="reset" >Reset</span>
 			</span>
         </div>
        
@@ -519,9 +521,7 @@ Store Search
 			<div id="veg-topping">
             <div class="toppingsheading1">
                 Cheese
-                <div class="toppingspicture">
-                    <img align="top" src="/PHIndia/Web/Assets/PHIN/Images/topping-cheese.png" alt="">
-                </div>
+               
             </div>
                 <div id="divToppingGroupId_462" class="toppinggroup">
                     <div onClick="javascript:void(0);" class="toppinggroup-name">
@@ -529,7 +529,7 @@ Store Search
                             <div class="radio">
                                 <span>
 									<label class="radio text-left">
-									<input type="radio"  value="Cheese Rs 65.00" name="cheese" class="radioClass" >
+									<input type="radio"  value="Cheese" name="cheese" class="radioClass" >
 									Cheese Rs 65.00 
 									</label>
                                           
@@ -552,7 +552,7 @@ Store Search
                             <div class="radio">
                                 <span>
 									<label class="radio text-left">
-									<input type="radio"  value="Chunky Chicken Type <?php echo $i;?> Rs 65.00" name="nonVegToppings<?php echo $i;?>" class="radioClass" >
+									<input type="radio"  value="Chunky Chicken Type <?php echo $i;?>" name="nonVegToppings<?php echo $i;?>" class="radioClass" >
 									 Chunky Chicken Type <?php echo $i;?> Rs 65.00 
 									</label>
                                    
@@ -577,7 +577,7 @@ Store Search
                             <div class="radio">
                                  <span>
 									<label class="radio text-left">
-									<input type="radio"  value="(v)Capsicum Type <?php echo $i;?> Rs 65.00" name="vegToppings<?php echo $i;?>"  class="radioClass" >
+									<input type="radio"  value="(v)Capsicum Type <?php echo $i;?>" name="vegToppings<?php echo $i;?>"  class="radioClass" >
 									 (v)Capsicum Type <?php echo $i;?>  Rs 65.00 
 									</label>
                                 </span>
@@ -595,7 +595,7 @@ Store Search
     </div>
 
     <div id="divToppingPictureContainedId" class="toppings-pic">
-            <img alt=" " src="/PHIndia/Web/Cache/470_Product_Small_Image_en-GB.jpg" class="toppings-pic-img">
+            
             <div id="pizza-topping-overlay-container">
 
             </div>
@@ -605,8 +605,17 @@ Store Search
                             <span>Quantity:</span>
             
                                 <input type="button" value="-" onClick="QuantityUpDown.Decrement({inputField: 'Quantity'})" class="QuantityUpDownButton btn btn-danger">
-<input type="text" value="1" name="Quantity" maxlength="2" id="Quantity" class="inputTwentyFive numericbasketqty" style="width:20px;margin:0;height:15px;">                                <input type="button" value="+" onClick="QuantityUpDown.Increment({inputField: 'Quantity'})" class="QuantityUpDownButton btn btn-danger">
-Rs 225.00                        </div>
+								<input type="text" value="1" name="Quantity" maxlength="2" id="Quantity" class="inputTwentyFive numericbasketqty" style="width:20px;margin:0;height:15px;">                         <input type="button" value="+" onClick="QuantityUpDown.Increment({inputField: 'Quantity'})" class="QuantityUpDownButton btn btn-danger">
+								Rs <span id="defaultPrice">199.00 </span> 
+								<input type="hidden" value="199.00" name="defaultPriceValue" id="defaultPriceValue" >
+								
+								 <div id='TextBoxesGroup' style="display:none;">
+									<div id="TextBoxDiv0">
+										<input type='textbox' id='textbox1fgf' >
+									</div>
+								</div>
+
+                      </div>
                         <div class="small-btnTwo">
                             <div class="button-wrapper"><div class="clear"></div><div class="button-start"></div><div class="button-container"><input type="submit" value="Add to Order" name="btnAddToBasket" id="btnAddToBasket" class="btn btn-success margin-add-button"></div><div class="button-end"></div><div class="clear"></div></div> 
                         </div>  
@@ -632,19 +641,231 @@ Rs 225.00                        </div>
 		
 		<!-- end 4th page : detail of products -->	
 		
-		
+		<!--  5th page : Checkout order page -->	
 		<div class="span10 margin-left0 width930" id="orderProductDetailDiv" style="display:none;">
-			<div class="productDetailDiv" >
-			fgfdgdfg
+			<div class="productDetailDiv" style="min-height: 100px;" >
+				<form id="frmCheckoutSubmit" action="javascript:frmCheckoutSubmit()" >
+			
+					<div class="toppings-background">    
+						<div class="choose-basics">YOUR ORDER </div>
+					</div>
+					
+					<div class="small-btnTwo" id="cartItemDetailOrder"> </div>
+					<div class="small-btnTwo subtotalPrice" id="" > Subtotal Rs <span id="cartItemDetailOrderSubTiotal">2,226.00</span>  </div>
+					
+					<div class="small-btnTwo">
+                          <div class="button-wrapper"><div class="clear"></div><div class="button-start"></div><div class="button-container"><br>&nbsp;&nbsp;<input type="submit" value="Confirm Order" name="btncConfirmOrder" id="btncConfirmOrder" class="btn btn-success "></div><div class="button-end"></div><div class="clear"></div></div> 
+                     </div>
+					
+				</form>
+					
 			</div>
 		</div>
+		<!-- end 5th page : Checkout order page -->	
 		
+		<!--  6th page : Checkout order detail page -->	
+		<div class="span10 margin-left0 width930" id="ordercheckoutDiv" style="display:none;">
+			<div class="productDetailDiv" >
+				<span id="confirmOrderError" class="error"></span> 
+				
+				<form id="frmCheckoutDetailSubmit" action="javascript:frmCheckoutDetailSubmit()" >
+			
+					<div class="toppings-background">    
+						<div class="choose-basics">Confirm Order Detail </div>
+					</div>
+					
+					<div class="small-btnTwo" > 
+					
+					<div class="payment-details-container">
+
+                            <div class="editor-field"><input type="text" value="" placeholder="First Name" name="FirstName" maxlength="30" id="FirstName"  class="inputTwoHundred"><div class="error"><span data-valmsg-replace="true" data-valmsg-for="FirstName" class="field-validation-valid"></span></div></div>
+
+                            <div class="editor-field"><input type="text" value="" placeholder="Last Name" name="LastName" maxlength="30" id="LastName"  class="inputTwoHundred"><div class="error"><span data-valmsg-replace="true" data-valmsg-for="LastName" class="field-validation-valid"></span></div></div>
+                                              
+                            <div class="editor-field"><input type="text" value="" placeholder="Email" name="ContactEmailPrimary" maxlength="30" id="ContactEmailPrimary"  class="inputTwoHundred"><div class="error"><span data-valmsg-replace="true" data-valmsg-for="ContactEmailPrimary" class="field-validation-valid"></span></div></div>
+							
+							
+                            <div class="editor-field"><input type="text" value="" placeholder="Mobile/Phone(98xxxxxxxx/124xxxxxxx)"  name="ContactTelephonePrimary" maxlength="10" id="ContactTelephonePrimary"  class="inputTwoHundred"><div class="error"><span data-valmsg-replace="true" data-valmsg-for="ContactTelephonePrimary" class="field-validation-valid"></span></div></div>
+                    <br><br>    
+                   			 <div class="editor-label" ><label for="MarketingOptIn" class="optional">
+							 <input type="checkbox" value="true" name="MarketingOptIn" id="MarketingOptIn" checked="checked" style="margin:0;">
+								<span>I would like to receive offers from Pizza Hut</span>
+							 
+							 </div>
+           			 </div>
+					
+					<br><br>    
+					</div>
+					
+					
+					<div class="toppings-background">    
+						<div class="choose-basics">Payment Summary</div>
+					</div>
+					
+					<div class="small-btnTwo" id="cartItemDetailOrderFinal"> </div>
+					<div class="small-btnTwo subtotalPricefinal" id="">SubTotal Rs <span id="cartItemDetailOrderFinalSubTiotal">2,226.00</span>  </div>
+					<div class="small-btnTwo subtotalPrice" id="" > Total Rs <span id="cartItemDetailOrderFinalTiotal">2,226.00</span>  </div>
+					<br><br>    
+					<div class="toppings-background">    
+						<div class="choose-basics">Special Instructions </div>
+					</div>
+					
+					<div class="small-btnTwo"> 
+						<textarea style="width:690px;margin-left:10px;" rows="2" name="GeneralNotes" id="GeneralNotes" cols="20"></textarea>
+					</div>
+					<br><br>    
+					
+					<div class="toppings-background">    
+						<div class="choose-basics">Mode of Payment</div>
+					</div>
+
+					<div class="toppinggroup-name-title">
+                            <div class="radio">
+                                <span>
+									<label class="radio text-left">
+									<input type="radio" class="radioClass1" name="cash" value="Cash" checked="checked">
+									Cash
+									</label>
+                                          
+                                </span>
+                            </div>
+                            
+                       </div>
+					   <br/>
+						&nbsp;&nbsp;&nbsp;For authorization purposes only. Please present the credit card to the delivery driver. 
+					<br><br>    
+					
+					<div class="small-btnTwo">
+                            <div class="button-wrapper"><div class="clear"></div><div class="button-start"></div><div class="button-container">&nbsp;&nbsp;<input type="submit" value="Confirm Order" name="btncConfirmOrder" id="btncConfirmOrder" class="btn btn-success "></div><div class="button-end"></div><div class="clear"></div></div> 
+                     </div>
+					
+				</form>
+					
+			</div>
+		</div>
+		<!-- end 6th page : Checkout order detail page -->	
+		
+		
+		<!--  7th page : thankyou page -->	
+		<div class="span10 margin-left0 width930" id="thankyouDiv" style="display:none;">
+			<div class="productDetailDiv" >
+				<form id="frmThankyouSubmit" action="javascript:frmThankyouSubmit();" >
+			
+					<div class="toppings-background">    
+						<div class="choose-basics">Thanks for your order!</div>
+					</div>
+					
+					
+					<div class="small-btnTwo" > 
+						<div class="thankyou-text-container">
+							<span class="thanks-heading">Order reference: 0219-<?php echo  time(); ?></span>
+							<br>
+							<span class="thanks-heading">Date: <?php echo date('d/m/Y h:i:s'); ?> </span>
+							<br>
+							</span><span class="thankyou-text-text">An email with details of your delicious order has been sent to your inbox. Enjoy your meal!</span>
+							<br>
+							
+								<span class="thankyou-text-text">Order faster next time!</span>
+								<span class="thankyou-text-link"><span>Create an account</span></span>
+								<br><br>
+								<span class="thankyou-text-subheading">Benefits Include:</span>
+								<br>
+								<span class="thankyou-text-text">Access to previous orders, save your address, save favourite orders!</span>
+						</div>
+					<br><br>    
+					</div>
+					
+					<div class="toppings-background">    
+						<div class="choose-basics">Pick up</div>
+					</div>
+					<br><br> 
+					<div class="small-btnTwo" > 
+					
+					<div class="payment-details-container">
+
+                            <div class="editor-field">
+							My Address<br> 
+							Ground Floor,<br> 
+							City Gold Multiplex,<br> 
+							Ashram Road, Ahmedabad, India,<br> 
+							Ashram Road<br> 
+							
+							</div>
+
+                            <div class="editor-field">
+							Your Neighboring Hut<br> 
+							Ground Floor<br> 
+							City Gold Multiplex<br> 
+							Ahmedabad<br> 
+							India<br> 
+							Ashram Road<br> 
+							+91 79 39883988<br> 
+							</div>
+                                              
+                            
+           			 </div>
+					
+					<br><br>    
+					</div>
+
+					<br><br>  <br><br>  <br><br>  
+					<div class="toppings-background">    
+						<div class="choose-basics">Payment Summary</div>
+					</div>
+					<div class="small-btnTwo" id="cartItemDetailPaymentSummary"> </div>
+					<div class="small-btnTwo subtotalPricefinal" id="">SubTotal Rs <span id="cartItemDetailPaymentSummarySubTiotal">2,226.00</span>  </div>
+					<div class="small-btnTwo subtotalPrice" id="" > Total Rs <span id="cartItemDetailPaymentSummaryTiotal">2,226.00</span>  </div>
+					<br>
+					<div class="red-btn"><span id="back-home" class="btn btn-success">Back To Home</span></div>
+				</form>
+			</div>
+		</div>
+		<!-- end 7th page : thankyou page -->	
 		<div class="span2 margin-left0 width247 account-detail">
 			<div class="account-head">ACCOUNT DETAIL</div>
-							
 			<div class="account-detail-main">
 				<div id="yourOrderDiv">
 					<div class="account-slid margin-bottom20 text-left"  id="slideToggleAccount">&nbsp;&nbsp;&nbsp;&nbsp;YOUR ORDER</div>
+
+				<!--fgdgfdgfd-->
+    
+<!--<div>
+    <div class="order-box-singleitems">
+			<div class="order-box-input" style="width: 43px;float:left;">
+					<input class="QuantityUpDownButton btn btn-danger" onClick="QuantityUpDown.Decrement({inputField: 'Quantity-25821082'})" value="-" type="button">
+				<input name="Quantity" id="Quantity-25821082" size="1" value="4" class="inputTwentyFive numericbasketqty" maxlength="2" type="text" style="width:20px;margin:0;height:15px;">
+					<input class="QuantityUpDownButton btn btn-danger" onClick="QuantityUpDown.Increment({inputField: 'Quantity-25821082'})" value="+" type="button">
+			</div>
+
+			<div class="basket-item-drop" style="text-align: left; width: 148px; margin-left: 50px;">
+				<div class="basket-item-arrow"></div>
+				<div class="order-box-item">
+					<span class="order-item">Exotica</span><br>
+					
+					<span class="order-item-child">
+						<span class="child-item">So Cheezy</span>
+						<br>
+					</span>
+					<span class="order-price">Rs 3,076.00</span>
+				</div>
+				
+				<div style="width: 46px; position: relative; left: 148px; top: -50px;">
+					<div class="basket-item-edit">
+					 
+						  <a href="javascript:void(0);" onClick="editProduct(1371007,25821082, 'PizzaHalfnHalfConfigurator',
+									true,4)">Edit</a>  
+					</div>
+					<div class="order-box-cross">
+						<div align="right">
+							<a href="/PHIndia/Web/en-GB/PHIN/PHIN/Ahmedabad%20-%20Ashram%20Road/Order/RemoveBasketItem?basketItemId=25821082" onClick="Sys.Mvc.AsyncHyperlink.handleClick(this, new Sys.UI.DomEvent(event), { insertionMode: Sys.Mvc.InsertionMode.replace, onBegin: Function.createDelegate(this, function(data){ShowBusyContainer();}), onComplete: Function.createDelegate(this, function(data){CloseBusyContainer();return AjaxUpdateTarget(data,'mini-basket-container'); }), onFailure: Function.createDelegate(this, function(data){HandleMSAjaxFailure(data);}), onSuccess: Function.createDelegate(this, function(data){_gaq.push(['_trackEvent', 'Order Contents', 'Remove', 'Exotica']);RedirectChecking(); registerBackgroundElements(data);RegisterSubmitEventOnQuantityChangeInMiniBasket();openBasketOrderBox();}) });"><img class="" src="/PHIndia/Web/Assets/PHIN/Images/btn-delete.png"></a>
+						</div>
+					</div>
+				</div>
+			</div>
+    </div>           
+</div>-->
+				
+				<!--fhgfhgfh-->
 					<div class="slideToggleAccountInfo margin-bottom20" style="display:none;">
 						<div id="emptyCart">
 						<strong>
@@ -654,7 +875,13 @@ Rs 225.00                        </div>
 						</strong><br><br></div>
 						
 						<div id="cartItemDetailDiv" style="display:none;" >
+							<div class="Totalbox-middle">
+								<div class="Totalbox-text">
+									TOTAL: <span class="currencyTotalMiniBasket" id="currencyTotalMiniBasket"> Rs 3,076.00</span>
+								</div>
+							</div>
 							<div id="cartItemDetail" > </div>
+							<div id="hdnItemInitialPrice"  style="display:none;" ><input type='hidden' value='0.00' name='hdnItemInitialPrice' id="hdnItemInitialPrice1" >  </div>
 							<div id="divOrderCouponTextInMiniBasket">
 							Please note that coupon will be applied in order review page.
 							</div>
@@ -685,99 +912,24 @@ Rs 225.00                        </div>
 					</div>
 				</div>
 
-<!--script for toggle div	-->		
-<script type="text/javascript">
-	$("#slideToggleAccount").click(function () {
-	   $('.slideToggleAccountInfo').slideToggle();
-	});
+	<!--script for toggle div	-->		
+	<script type="text/javascript">
+		$("#slideToggleAccount").click(function () {
+		   $('.slideToggleAccountInfo').slideToggle();
+		});
+		
+		$("#slideToggleDeliveryDetail").click(function () {
+		   $('.slideToggleDeliveryDetailInfo').slideToggle();
+		});
+	</script>
 	
-	$("#slideToggleDeliveryDetail").click(function () {
-	   $('.slideToggleDeliveryDetailInfo').slideToggle();
-	});
-</script>
-
-	<!--		<script language="javascript"> 
-function toggle() {
-	var ele = document.getElementById("toggleText");
-	var text = document.getElementById("displayText");
-	if(ele.style.display == "block") {
-    		ele.style.display = "none";
-		text.innerHTML = "show";
-  	}
-	else {
-		ele.style.display = "block";
-		text.innerHTML = "hide";
-	}
-} 
-</script>
- 
-<a id="displayTexot" href="javascript:toggle();">show</a> <== click Here
-<div id="toggleText" style="display: none"><h1>peek-a-boo</h1></div>-->
-		
-		</div>
-		
-		 </div>
-	   
-	   
-	   
-	   
-	   
-	</div>			
-			
-				<br>
-				<br>
-			
+				</div>
+			 </div>
+			</div>			
+			<br>
+			<br>
 		</div>
 	</div>
-
-	
-</section>
-
-<!--<ul>
-    <li><a href="example_1/">Example 1</a></li>
-    <li><a href="example_2/">Example 2</a></li>
-</ul>-->
-
-<a href="#" class="go-top" style="display: none;"><i class="icon-double-angle-up"></i></a>
-
-<script src="themes/js/jquery-1.9.1.min.js"></script>
-<script src="bootstrap/js/bootstrap.min.js" type="text/javascript"></script>
-<script src="themes/js/jquery.scrollTo-1.4.3.1-min.js" type="text/javascript"></script>
-<script src="themes/js/jquery.easing-1.3.min.js"></script>
-<script src="themes/js/jquery.scrollTo-1.4.3.1-min.js"></script>
-<script src="themes/js/jquery.prettyPhoto.js"></script>
-<script src="themes/js/custom.js" type="text/javascript"></script>
+</section >
+</body>
 </html>
-</body>
-
-<!--<!DOCTYPE html>
-<html>
-<head>
-    <title></title>
-</head>
-<body>
-<ul>
-    <li><a href="example_1/">Example 1</a></li>
-    <li><a href="http://php-backbone.gopagoda.com/example_2/">Example 2</a></li>
-</ul>
-</body>
-</html>-->
-
-
-
-<!--<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <title>hello-backbonejs</title>
-</head>
-<body>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.js"></script>
-  <script src="http://ajax.cdnjs.com/ajax/libs/json2/20110223/json2.js"></script>
-  <script src="http://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.5.2/underscore.js"></script>
-  <script src="http://cdnjs.cloudflare.com/ajax/libs/backbone.js/1.1.0/backbone-min.js"></script>
-
-  <script src="2.js"></script>
-</body>
-</html>-->
-

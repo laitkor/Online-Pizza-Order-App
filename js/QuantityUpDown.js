@@ -19,6 +19,12 @@
             var currentVal = QuantityUpDown.GetInputValue();
             if (currentVal < QuantityUpDown._maxValue) {
                 currentVal = currentVal + 1;
+				
+				var dfultPrice = parseFloat($('#defaultPriceValue').val());
+					var dfltItmPrice = parseFloat(65.00);
+					var total = parseFloat(dfultPrice + dfltItmPrice);
+					$('#defaultPrice').html(total.toFixed(2));
+					$('#defaultPriceValue').val(total.toFixed(2));
             }
             QuantityUpDown.SetInputValue(currentVal);
         },
@@ -27,6 +33,11 @@
             var currentVal = QuantityUpDown.GetInputValue();
             if (currentVal > QuantityUpDown._defaultValue) {
                 currentVal = currentVal - 1;
+				var dfultPrice = parseFloat($('#defaultPriceValue').val());
+				var dfltItmPrice = parseFloat(65.00);
+				var total = parseFloat(dfultPrice - dfltItmPrice);
+				$('#defaultPrice').html(total.toFixed(2));
+				$('#defaultPriceValue').val(total.toFixed(2));
             }
             QuantityUpDown.SetInputValue(currentVal);
         },
